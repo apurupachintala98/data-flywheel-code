@@ -179,7 +179,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
             setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
-                    msg.text === sqlMessage.text
+                    msg.text === sqlQuery.text
                         ? {
                             ...msg,
                             text: msg.text,  // Keep the original SQL response
