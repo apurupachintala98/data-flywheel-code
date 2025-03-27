@@ -201,34 +201,34 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 </table>
               ) : convertToString(resultData);
 
-            // const executedMessage = {
+            const executedMessage = {
+                text: renderedResponse,
+                fromUser: false,
+                executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+                type: isTable ? "table" : "result",
+                showExecute: false,
+                showSummarize: true,
+                prompt: sqlQuery.prompt,
+            };
+
+            // setMessages((prev) => [...prev, {
             //     text: sqlQuery.text,
             //     fromUser: false,
-            //     executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+            //     executedResponse: resultData,
+            //     content: renderedResponse,
             //     type: isTable ? "table" : "result",
             //     showExecute: false,
             //     showSummarize: true,
             //     prompt: sqlQuery.prompt
-            // };
-
-            setMessages((prev) => [...prev, {
-                text: sqlQuery.text,
-                fromUser: false,
-                executedResponse: resultData,
-                content: renderedResponse,
-                type: isTable ? "table" : "result",
-                showExecute: false,
-                showSummarize: true,
-                prompt: sqlQuery.prompt
-              }]);
-            // setMessages((prevMessages) => [...prevMessages, executedMessage]);
-            // setMessages((prevMessages) =>
-            //     prevMessages.map((msg) =>
-            //         msg.text === sqlQuery.text
-            //             ? { ...msg, showExecute: false }
-            //             : msg
-            //     ).concat(executedMessage)
-            // );
+            //   }]);
+            setMessages((prevMessages) => [...prevMessages, executedMessage]);
+            setMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.text === sqlQuery.text
+                        ? { ...msg, showExecute: false }
+                        : msg
+                ).concat(executedMessage)
+            );
 
         } catch (error) {
             console.error("Error executing SQL:", error);
