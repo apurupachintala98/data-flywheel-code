@@ -179,16 +179,16 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
 
     const isTable = Array.isArray(message.executedResponse)
-    && message.executedResponse.length > 0
-    && typeof message.executedResponse[0] === 'object';
+        && message.executedResponse.length > 0
+        && typeof message.executedResponse[0] === 'object';
 
-const convertToString = (input) => {
-    if (typeof input === 'string') return input;
-    if (Array.isArray(input)) return input.map(convertToString).join(', ');
-    if (typeof input === 'object' && input !== null)
-        return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
-    return String(input);
-};
+    const convertToString = (input) => {
+        if (typeof input === 'string') return input;
+        if (Array.isArray(input)) return input.map(convertToString).join(', ');
+        if (typeof input === 'object' && input !== null)
+            return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+        return String(input);
+    };
 
     return (
         <div className="mb-4">
@@ -229,73 +229,78 @@ const convertToString = (input) => {
                 ) : (
                     <Typography>{message.text}</Typography>
                 )} */}
-           {isTable ? (
-    <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'start',
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        padding: '12px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-        overflowX: 'auto',
-        maxWidth: '100%'
-    }}>
-        <table style={{
-            borderCollapse: 'collapse',
-            width: '100%',
-            fontSize: '14px',
-            fontFamily: 'Arial, sans-serif',
-            color: '#000',
-            tableLayout: 'fixed'
-        }}>
-            <thead>
-                <tr>
-                    {Object.keys(message.executedResponse[0]).map((column) => (
-                        <th
-                            key={column}
-                            style={{
-                                border: '1px solid #000',
-                                padding: '8px',
-                                textAlign: 'left',
-                                backgroundColor: '#fff',
-                                fontWeight: 'bold',
-                                color: '#001f5b'
-                            }}
-                        >
-                            {column}
-                        </th>
-                    ))}
-                </tr>
-            </thead>
-            <tbody>
-                {message.executedResponse.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                        {Object.keys(row).map((colKey) => (
-                            <td
-                                key={`${rowIndex}-${colKey}`}
-                                style={{
-                                    border: '1px solid #000',
-                                    padding: '8px',
-                                    textAlign: typeof row[colKey] === 'number' ? 'right' : 'left',
-                                    backgroundColor: '#fff'
-                                }}
-                            >
-                                {convertToString(row[colKey])}
-                            </td>
-                        ))}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-                ) : (
-                    <Typography>
-                        {typeof message.executedResponse === 'string'
-                            ? message.executedResponse
-                            : message.text}
-                    </Typography>
-                )}
+                {isSQL ? (
+                    <SyntaxHighlighter language="sql" style={dracula}>
+                        {message.text}
+                    </SyntaxHighlighter>
+                ) :
+                    isTable ? (
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'start',
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            padding: '12px',
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                            overflowX: 'auto',
+                            maxWidth: '100%'
+                        }}>
+                            <table style={{
+                                borderCollapse: 'collapse',
+                                width: '100%',
+                                fontSize: '14px',
+                                fontFamily: 'Arial, sans-serif',
+                                color: '#000',
+                                tableLayout: 'fixed'
+                            }}>
+                                <thead>
+                                    <tr>
+                                        {Object.keys(message.executedResponse[0]).map((column) => (
+                                            <th
+                                                key={column}
+                                                style={{
+                                                    border: '1px solid #000',
+                                                    padding: '8px',
+                                                    textAlign: 'left',
+                                                    backgroundColor: '#fff',
+                                                    fontWeight: 'bold',
+                                                    color: '#001f5b'
+                                                }}
+                                            >
+                                                {column}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {message.executedResponse.map((row, rowIndex) => (
+                                        <tr key={rowIndex}>
+                                            {Object.keys(row).map((colKey) => (
+                                                <td
+                                                    key={`${rowIndex}-${colKey}`}
+                                                    style={{
+                                                        border: '1px solid #000',
+                                                        padding: '8px',
+                                                        textAlign: typeof row[colKey] === 'number' ? 'right' : 'left',
+                                                        backgroundColor: '#fff'
+                                                    }}
+                                                >
+                                                    {convertToString(row[colKey])}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <Typography>
+                            {typeof message.executedResponse === 'string'
+                                ? message.executedResponse
+                                : message.text}
+                        </Typography>
+                    )}
                 {message.showExecute && (
                     <Button
                         variant="contained"
