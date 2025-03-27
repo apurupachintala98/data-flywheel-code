@@ -296,16 +296,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     typeEffect();
                 }
             }
-    
-            // Remove summarize button and finalize stream
-            setMessages(prev =>
-                prev.map(msg =>
-                    msg.text === message.text && msg.executedResponse === message.executedResponse
-                        ? { ...msg, summarized: true, showSummarize: false }
-                        : msg
-                )
-            );
-    
+
             setMessages(prev => {
                 const last = prev[prev.length - 1];
                 if (last?.streaming) {
