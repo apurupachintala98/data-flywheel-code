@@ -193,7 +193,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                         : msg
                 ).concat(executedMessage)
             );
-            
+
         } catch (error) {
             console.error("Error executing SQL:", error);
             const errorMessage = { text: "Error executing SQL query.", fromUser: false };
@@ -283,13 +283,21 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             }
 
             setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.text === message.text
-                        ? { ...msg, summarized: true, showSummarize: false }
-                        : msg
-                )
+                prevMessages
+                    .map((msg) =>
+                        msg.text === message.text
+                            ? { ...msg, summarized: true, showSummarize: false }
+                            : msg
+                    )
+                    .concat({
+                        text: fullText,
+                        fromUser: false,
+                        summarized: true,
+                        type: 'text',
+                    })
             );
-    
+
+
         } catch (err) {
             console.error("Streaming error:", err);
         }
