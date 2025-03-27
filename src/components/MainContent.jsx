@@ -124,8 +124,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                   "app_id": "docai",
                   "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
                   "model": "llama3.1-70b",
-                  "semantic_model": JSON.stringify(selectedYamlModels),
-                  "search_service": JSON.stringify(selectedSearchModels),
+                  "semantic_model": selectedYamlModels,
+                  "search_service": selectedSearchModels,
                   "search_limit": 0,
                   "prompt": {
                     "messages": [
