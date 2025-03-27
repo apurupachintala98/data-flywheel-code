@@ -178,9 +178,9 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     const isSQL = message.type === "sql" || message.type === "table";
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
 
-    const isTable = message.executedResponse && Array.isArray(message.executedResponse)
-        && message.executedResponse.length > 0;
-        console.log(isTable);
+   
+        console.log(message.executedResponse && Array.isArray(message.executedResponse)
+        && message.executedResponse.length > 0);
 
        
 
@@ -207,7 +207,8 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
-                ) : isTable ? (
+                ) : (message.executedResponse && Array.isArray(message.executedResponse)
+                && message.executedResponse.length > 0) ? (
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',
