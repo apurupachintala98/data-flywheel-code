@@ -202,7 +202,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
               ) : convertToString(resultData);
 
             const executedMessage = {
-                text: renderedResponse,
+                text: sqlQuery.text,
                 fromUser: false,
                 executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
                 type: isTable ? "table" : "result",
@@ -210,18 +210,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 showSummarize: true,
                 prompt: sqlQuery.prompt,
             };
-
-            // setMessages((prev) => [...prev, {
-            //     text: sqlQuery.text,
-            //     fromUser: false,
-            //     executedResponse: resultData,
-            //     content: renderedResponse,
-            //     type: isTable ? "table" : "result",
-            //     showExecute: false,
-            //     showSummarize: true,
-            //     prompt: sqlQuery.prompt
-            //   }]);
-            setMessages((prevMessages) => [...prevMessages, executedMessage]);
             setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                     msg.text === sqlQuery.text

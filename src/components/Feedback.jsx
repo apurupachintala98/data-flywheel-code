@@ -113,6 +113,63 @@ const Feedback = ({ message }) => {
     );
 };
 
+// const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
+//     if (!message?.text) {
+//         return null;
+//     }
+
+//     const isSQL = message.type === "sql";
+//     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
+//     return (
+//         <div className="mb-4">
+//             <div
+//                 className={`p-2 rounded-lg ${message.fromUser ? 'bg-blue-500 text-white' : isSQL ? 'bg-gray-900 text-white' : 'bg-gray-200 text-black'}`}
+//                 style={{
+//                     fontFamily: "ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol",
+//                     textAlign: "left",
+//                     padding: isSQL ? '12px' : '8px', // Extra padding for SQL blocks
+//                     borderRadius: "8px"
+//                 }}
+//             >
+//                 {isSQL ? (
+//                     <SyntaxHighlighter language="sql" style={dracula}>
+//                         {message.text}
+//                     </SyntaxHighlighter>
+//                 ) : (
+//                     <Typography>{message.text}</Typography>
+//                 )}
+
+//                 {message.showExecute && (
+//                     <Button
+//                         variant="contained"
+//                         color="#000"
+//                         sx={{ marginTop: '10px' }}
+//                         onClick={() => executeSQL(message)}
+//                     >
+//                         Execute SQL
+//                     </Button>
+//                 )}
+
+//                 {message.showSummarize && (
+//                     <Button
+//                         variant="contained"
+//                         color="#000"
+//                         sx={{ marginTop: '10px' }}
+//                         onClick={() => apiCortex(message)}
+//                     >
+//                         Summarize
+//                     </Button>
+//                 )}
+
+//             </div>
+//             {message.type === 'text' && !message.fromUser && shouldShowFeedback && (
+//                 <Feedback message={message} />
+//             )}
+
+//         </div>
+//     );
+// };
+
 const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     if (!message?.text) {
         return null;
@@ -120,6 +177,16 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
 
     const isSQL = message.type === "sql";
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
+
+    const isTable = Array.isArray(message.executedResponse) && message.executedResponse.length > 0 && typeof message.executedResponse[0] === 'object';
+
+    const convertToString = (input) => {
+        if (typeof input === 'string') return input;
+        if (Array.isArray(input)) return input.map(convertToString).join(', ');
+        if (typeof input === 'object' && input !== null) return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+        return String(input);
+    };
+
     return (
         <div className="mb-4">
             <div
@@ -127,7 +194,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                 style={{
                     fontFamily: "ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol",
                     textAlign: "left",
-                    padding: isSQL ? '12px' : '8px', // Extra padding for SQL blocks
+                    padding: isSQL ? '12px' : '8px',
                     borderRadius: "8px"
                 }}
             >
@@ -135,6 +202,27 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
+                ) : isTable ? (
+                    <TableContainer component={Paper}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    {Object.keys(message.executedResponse[0]).map((key) => (
+                                        <TableCell key={key} sx={{ fontWeight: 'bold' }}>{key}</TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {message.executedResponse.map((row, rowIndex) => (
+                                    <TableRow key={rowIndex}>
+                                        {Object.values(row).map((value, colIndex) => (
+                                            <TableCell key={colIndex}>{convertToString(value)}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 ) : (
                     <Typography>{message.text}</Typography>
                 )}
