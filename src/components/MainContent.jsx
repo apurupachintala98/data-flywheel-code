@@ -308,7 +308,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
     const apiCortex = async (message) => {
         const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
-        
+    
         const payload = {
             query: {
                 aplctn_cd: "aedldocai",
@@ -334,6 +334,12 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
         try {
             const response = await ApiService.postCortexPrompt(payload);
+    
+            // SAFETY: Check if response and body exist
+            if (!response || !response.body || typeof response.body.getReader !== 'function') {
+                throw new Error("Response stream is not available");
+            }
+    
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
     
@@ -342,7 +348,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             let isTyping = false;
             let isStreamEnded = false;
     
-            // 1. Add a placeholder streaming message first
+            // Add placeholder message for streaming UI
             const placeholderMessage = {
                 text: '',
                 fromUser: false,
@@ -365,8 +371,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     const lastIndex = prev.length - 1;
                     const last = prev[lastIndex];
                     if (last && last.streaming) {
-                        const updated = { ...last, text: last.text + nextChar };
-                        return [...prev.slice(0, lastIndex), updated];
+                        return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
                     }
                     return prev;
                 });
@@ -374,21 +379,20 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 setTimeout(typeEffect, 30);
             };
     
-            // 2. Read streaming response
+            // Read streaming response
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
     
-                let chunk = decoder.decode(value, { stream: true });
+                const chunk = decoder.decode(value, { stream: true });
     
                 const eosIndex = chunk.indexOf('end_of_stream');
-                if (eosIndex !== -1) {
-                    chunk = chunk.slice(0, eosIndex);
-                    isStreamEnded = true;
-                }
+                const finalChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
     
-                fullText += chunk;
-                typingQueue += chunk;
+                fullText += finalChunk;
+                typingQueue += finalChunk;
+    
+                if (eosIndex !== -1) isStreamEnded = true;
     
                 if (!isTyping && typingQueue.length > 0) {
                     isTyping = true;
@@ -396,7 +400,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 }
             }
     
-            // 3. Hide the "Summarize" button from the original SQL message
+            // Hide "Summarize" on original SQL message
             setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                     msg.text === message.text && msg.executedResponse === message.executedResponse
@@ -405,28 +409,38 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 )
             );
     
-            // 4. Finalize the placeholder message
+            // Finalize the streamed message
             setMessages((prev) => {
                 const lastIndex = prev.length - 1;
                 const last = prev[lastIndex];
                 if (last && last.streaming) {
-                    const finalized = {
+                    return [...prev.slice(0, lastIndex), {
                         ...last,
                         streaming: false,
                         summarized: true,
                         showSummarize: false
-                    };
-                    return [...prev.slice(0, lastIndex), finalized];
+                    }];
                 }
                 return prev;
             });
     
         } catch (err) {
             console.error("Streaming error:", err);
+    
+            // Optional: Remove broken placeholder if it exists
+            setMessages((prev) => {
+                if (prev.length && prev[prev.length - 1]?.streaming) {
+                    return prev.slice(0, -1);
+                }
+                return prev;
+            });
+    
+            // Show fallback error
             const errorMessage = { text: "An error occurred while summarizing.", fromUser: false };
             setMessages((prev) => [...prev, errorMessage]);
         }
     };
+    
 
     
     return (
