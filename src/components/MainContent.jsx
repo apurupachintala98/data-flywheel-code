@@ -205,107 +205,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         }
     };
 
-    // const apiCortex = async (message) => {
-    //     const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
-    //     const payload = {
-    //         query: {
-    //             aplctn_cd: "aedldocai",
-    //             app_id: "docai",
-    //             api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-    //             method: "cortex",
-    //             model: "llama3.1-70b-elevance",
-    //             sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
-    //             limit_convs: "0",
-    //             prompt: {
-    //                 messages: [
-    //                     {
-    //                         role: "user",
-    //                         content: message.prompt,
-    //                     }
-    //                 ]
-    //             },
-    //             app_lvl_prefix: "",
-    //             user_id: "",
-    //             session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
-    //         }
-    //     };
-
-    //     try {
-    //         const response = await ApiService.postCortexPrompt(payload);
-    //         const reader = response.body.getReader();
-    //         const decoder = new TextDecoder();
-
-    //         let fullText = '';
-    //         let typingQueue = '';
-    //         let isTyping = false;
-    //         let isStreamEnded = false;
-
-    //         const typeEffect = () => {
-    //             if (typingQueue.length === 0) {
-    //                 isTyping = false;
-    //                 return;
-    //             }
-
-    //             const nextChar = typingQueue.charAt(0);
-    //             typingQueue = typingQueue.slice(1);
-
-    //             setMessages((prev) => {
-    //                 const last = prev[prev.length - 1];
-    //                 if (last && !last.fromUser) {
-    //                     return [
-    //                         ...prev.slice(0, -1),
-    //                         { ...last, text: last.text + nextChar },
-    //                     ];
-    //                 } else {
-    //                     return [...prev, { text: nextChar, fromUser: false }];
-    //                 }
-    //             });
-
-    //             setTimeout(typeEffect, 30);
-    //         };
-
-    //         while (!isStreamEnded) {
-    //             const { done, value } = await reader.read();
-    //             if (done) break;
-
-    //             let chunk = decoder.decode(value, { stream: true });
-
-    //             // Check if "end_of_stream" is present
-    //             const eosIndex = chunk.indexOf('end_of_stream');
-    //             if (eosIndex !== -1) {
-    //                 // Only keep the part before "end_of_stream"
-    //                 chunk = chunk.slice(0, eosIndex);
-    //                 isStreamEnded = true;
-    //             }
-
-    //             fullText += chunk;
-    //             typingQueue += chunk;
-
-    //             if (!isTyping && typingQueue.length > 0) {
-    //                 isTyping = true;
-    //                 typeEffect();
-    //             }
-    //         }
-
-    //         setMessages((prevMessages) =>
-    //             prevMessages.map((msg) =>
-    //                 msg.text === message.text && msg.executedResponse === message.executedResponse
-    //                     ? { ...msg, summarized: true, showSummarize: false }
-    //                     : msg
-    //             ).concat({
-    //                 text: fullText, // this is the streamed result
-    //                 fromUser: false,
-    //                 summarized: true,
-    //                 type: 'text',
-    //             })
-    //         );
-
-
-    //     } catch (err) {
-    //         console.error("Streaming error:", err);
-    //     }
-    // };
-
     const apiCortex = async (message) => {
         const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
     
@@ -343,6 +242,83 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
             if (!response.body) throw new Error("No stream in response.");
     
+            // const reader = response.body.getReader();
+            // const decoder = new TextDecoder();
+    
+            // let fullText = '';
+            // let typingQueue = '';
+            // let isTyping = false;
+            // let isStreamEnded = false;
+    
+            // // Add a placeholder streaming message
+            // const placeholderMessage = {
+            //     text: '',
+            //     fromUser: false,
+            //     summarized: true,
+            //     type: 'text',
+            //     streaming: true
+            // };
+            // setMessages(prev => [...prev, placeholderMessage]);
+    
+            // const typeEffect = () => {
+            //     if (typingQueue.length === 0) {
+            //         isTyping = false;
+            //         return;
+            //     }
+    
+            //     const nextChar = typingQueue.charAt(0);
+            //     typingQueue = typingQueue.slice(1);
+    
+            //     setMessages(prev => {
+            //         const lastIndex = prev.length - 1;
+            //         const last = prev[lastIndex];
+            //         if (last?.streaming) {
+            //             return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
+            //         }
+            //         return prev;
+            //     });
+    
+            //     setTimeout(typeEffect, 30);
+            // };
+    
+            // while (!isStreamEnded) {
+            //     const { done, value } = await reader.read();
+            //     if (done) break;
+    
+            //     const chunk = decoder.decode(value, { stream: true });
+            //     const eosIndex = chunk.indexOf('end_of_stream');
+            //     const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
+    
+            //     fullText += validChunk;
+            //     typingQueue += validChunk;
+            //     if (eosIndex !== -1) isStreamEnded = true;
+    
+            //     if (!isTyping && typingQueue.length > 0) {
+            //         isTyping = true;
+            //         typeEffect();
+            //     }
+            // }
+    
+            // // Remove summarize button and finalize stream
+            // setMessages(prev =>
+            //     prev.map(msg =>
+            //         msg.text === message.text && msg.executedResponse === message.executedResponse
+            //             ? { ...msg, summarized: true, showSummarize: false }
+            //             : msg
+            //     )
+            // );
+    
+            // setMessages(prev => {
+            //     const last = prev[prev.length - 1];
+            //     if (last?.streaming) {
+            //         return [
+            //             ...prev.slice(0, -1),
+            //             { ...last, streaming: false, summarized: true, showSummarize: false }
+            //         ];
+            //     }
+            //     return prev;
+            // });
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
     
@@ -351,15 +327,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             let isTyping = false;
             let isStreamEnded = false;
     
-            // Add a placeholder streaming message
-            const placeholderMessage = {
-                text: '',
-                fromUser: false,
-                summarized: true,
-                type: 'text',
-                streaming: true
-            };
-            setMessages(prev => [...prev, placeholderMessage]);
+            // Add initial assistant message so we can stream characters into it
+            setChatLog(prev => [...prev, { role: 'assistant', content: '' }]);
     
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
@@ -370,46 +339,42 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
     
-                setMessages(prev => {
-                    const lastIndex = prev.length - 1;
-                    const last = prev[lastIndex];
-                    if (last?.streaming) {
-                        return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
+                setChatLog(prev => {
+                    const last = prev[prev.length - 1];
+                    if (last && last.role === 'assistant') {
+                        return [
+                            ...prev.slice(0, -1),
+                            { ...last, content: last.content + nextChar }
+                        ];
                     }
                     return prev;
                 });
     
-                setTimeout(typeEffect, 30);
+                setTimeout(typeEffect, 30); // typing speed
             };
     
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
     
-                const chunk = decoder.decode(value, { stream: true });
-                const eosIndex = chunk.indexOf('end_of_stream');
-                const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
+                let chunk = decoder.decode(value, { stream: true });
     
-                fullText += validChunk;
-                typingQueue += validChunk;
-                if (eosIndex !== -1) isStreamEnded = true;
+                const eosIndex = chunk.indexOf('end_of_stream');
+                if (eosIndex !== -1) {
+                    chunk = chunk.slice(0, eosIndex);
+                    isStreamEnded = true;
+                }
+    
+                fullText += chunk;
+                typingQueue += chunk;
     
                 if (!isTyping && typingQueue.length > 0) {
                     isTyping = true;
                     typeEffect();
                 }
             }
-    
-            // Remove summarize button and finalize stream
-            setMessages(prev =>
-                prev.map(msg =>
-                    msg.text === message.text && msg.executedResponse === message.executedResponse
-                        ? { ...msg, summarized: true, showSummarize: false }
-                        : msg
-                )
-            );
-    
-            setMessages(prev => {
+
+              setMessages(prev => {
                 const last = prev[prev.length - 1];
                 if (last?.streaming) {
                     return [
@@ -419,6 +384,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 }
                 return prev;
             });
+    
     
         } catch (err) {
             console.error("Streaming error:", err);
