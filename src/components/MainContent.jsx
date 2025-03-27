@@ -311,34 +311,37 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
         const payload = {
             query: {
-                aplctn_cd: "aedldocai",
-                app_id: "docai",
-                api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-                method: "cortex",
-                model: "llama3.1-70b-elevance",
-                sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
-                limit_convs: "0",
-                prompt: {
-                    messages: [
-                        {
-                            role: "user",
-                            content: message.prompt,
-                        }
-                    ]
-                },
-                app_lvl_prefix: "",
-                user_id: "",
-                session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
+               aplctn_cd: "aedldocai",
+               app_id: "docai",
+               api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+               method: "cortex",
+               model: "llama3.1-70b-elevance",
+               sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
+               limit_convs: "0",
+               prompt: {
+                  messages: [
+                     {
+                        role: "user",
+                        content: message.prompt,
+                     }
+                  ]
+               },
+               app_lvl_prefix: "",
+               user_id: "",
+               session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
             }
-        };
+         };
     
         try {
-            const response = await ApiService.postCortexPrompt(payload);
+            const response = await fetch("http://10.126.192.122:8340/api/cortex/complete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
     
-            // SAFETY: Check if response and body exist
-            if (!response || !response.body || typeof response.body.getReader !== 'function') {
-                throw new Error("Response stream is not available");
-            }
+            if (!response.body) throw new Error("No stream in response.");
     
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -348,7 +351,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             let isTyping = false;
             let isStreamEnded = false;
     
-            // Add placeholder message for streaming UI
+            // Add a placeholder streaming message
             const placeholderMessage = {
                 text: '',
                 fromUser: false,
@@ -356,7 +359,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 type: 'text',
                 streaming: true
             };
-            setMessages((prev) => [...prev, placeholderMessage]);
+            setMessages(prev => [...prev, placeholderMessage]);
     
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
@@ -367,10 +370,10 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
     
-                setMessages((prev) => {
+                setMessages(prev => {
                     const lastIndex = prev.length - 1;
                     const last = prev[lastIndex];
-                    if (last && last.streaming) {
+                    if (last?.streaming) {
                         return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
                     }
                     return prev;
@@ -379,19 +382,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 setTimeout(typeEffect, 30);
             };
     
-            // Read streaming response
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
     
                 const chunk = decoder.decode(value, { stream: true });
-    
                 const eosIndex = chunk.indexOf('end_of_stream');
-                const finalChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
+                const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
     
-                fullText += finalChunk;
-                typingQueue += finalChunk;
-    
+                fullText += validChunk;
+                typingQueue += validChunk;
                 if (eosIndex !== -1) isStreamEnded = true;
     
                 if (!isTyping && typingQueue.length > 0) {
@@ -400,46 +400,43 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 }
             }
     
-            // Hide "Summarize" on original SQL message
-            setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
+            // Remove summarize button and finalize stream
+            setMessages(prev =>
+                prev.map(msg =>
                     msg.text === message.text && msg.executedResponse === message.executedResponse
                         ? { ...msg, summarized: true, showSummarize: false }
                         : msg
                 )
             );
     
-            // Finalize the streamed message
-            setMessages((prev) => {
-                const lastIndex = prev.length - 1;
-                const last = prev[lastIndex];
-                if (last && last.streaming) {
-                    return [...prev.slice(0, lastIndex), {
-                        ...last,
-                        streaming: false,
-                        summarized: true,
-                        showSummarize: false
-                    }];
+            setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.streaming) {
+                    return [
+                        ...prev.slice(0, -1),
+                        { ...last, streaming: false, summarized: true, showSummarize: false }
+                    ];
                 }
                 return prev;
             });
     
         } catch (err) {
             console.error("Streaming error:", err);
-    
-            // Optional: Remove broken placeholder if it exists
-            setMessages((prev) => {
+            setMessages(prev => {
                 if (prev.length && prev[prev.length - 1]?.streaming) {
-                    return prev.slice(0, -1);
+                    return prev.slice(0, -1); // Remove failed placeholder
                 }
                 return prev;
             });
     
-            // Show fallback error
-            const errorMessage = { text: "An error occurred while summarizing.", fromUser: false };
-            setMessages((prev) => [...prev, errorMessage]);
+            const errorMessage = {
+                text: "An error occurred while summarizing.",
+                fromUser: false
+            };
+            setMessages(prev => [...prev, errorMessage]);
         }
     };
+    
     
 
     
