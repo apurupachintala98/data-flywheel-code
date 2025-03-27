@@ -338,13 +338,12 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
-    
-                setChatLog(prev => {
+                setMessages(prev => {
                     const last = prev[prev.length - 1];
-                    if (last && last.role === 'assistant') {
+                    if (last?.streaming) {
                         return [
                             ...prev.slice(0, -1),
-                            { ...last, content: last.content + nextChar }
+                            { ...last, content: last.content + nextChar, streaming: false, summarized: true, showSummarize: false }
                         ];
                     }
                     return prev;
@@ -374,16 +373,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 }
             }
 
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.streaming) {
-                    return [
-                        ...prev.slice(0, -1),
-                        { ...last, streaming: false, summarized: true, showSummarize: false }
-                    ];
-                }
-                return prev;
-            });
+              
     
     
         } catch (err) {
