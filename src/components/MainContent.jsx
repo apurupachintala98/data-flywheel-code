@@ -240,90 +240,117 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
             if (!response.body) throw new Error("No stream in response.");
             const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+            const decoder = new TextDecoder("utf-8");
 
-        let fullText = '';
-        let isDone = false;
+            let fullText = '';
+            let isDone = false;
 
-        setMessages(prev => [
-            ...prev,
-            {
-                text: '',
-                fromUser: false,
-                summarized: true,
-                type: 'text',
-                streaming: true
+            setMessages(prev => [
+                ...prev,
+                {
+                    text: '',
+                    fromUser: false,
+                    summarized: true,
+                    type: 'text',
+                    streaming: true
+                }
+            ]);
+
+            while (!isDone) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                let chunk = decoder.decode(value, { stream: true });
+
+                // Check for "end_of_stream"
+                const eosIndex = chunk.indexOf("end_of_stream");
+                if (eosIndex !== -1) {
+                    chunk = chunk.slice(0, eosIndex);  // Remove everything after "end_of_stream"
+                    isDone = true;
+                }
+
+                fullText += chunk;
+
+                // Update latest message with accumulated text
+                setMessages(prev => {
+                    const lastIndex = prev.length - 1;
+                    const last = prev[lastIndex];
+                    if (last?.streaming) {
+                        return [
+                            ...prev.slice(0, lastIndex),
+                            {
+                                ...last,
+                                text: fullText,
+                                streaming: true
+                            }
+                        ];
+                    }
+                    return prev;
+                });
             }
-        ]);
 
-        while (!isDone) {
-            const { value, done } = await reader.read();
-            if (done) break;
+            // setMessages(prev => {
+            //     const lastIndex = prev.length - 1;
+            //     const last = prev[lastIndex];
+            //     if (last?.streaming) {
+            //         return [
+            //             ...prev.slice(0, lastIndex),
+            //             {
+            //                 ...last,
+            //                 streaming: false,
+            //                 summarized: true,
+            //                 showSummarize: false
+            //             }
+            //         ];
+            //     }
+            //     return prev;
+            // });
 
-            let chunk = decoder.decode(value, { stream: true });
-
-            // Check for "end_of_stream"
-            const eosIndex = chunk.indexOf("end_of_stream");
-            if (eosIndex !== -1) {
-                chunk = chunk.slice(0, eosIndex);  // Remove everything after "end_of_stream"
-                isDone = true;
-            }
-
-            fullText += chunk;
-
-            // Update latest message with accumulated text
             setMessages(prev => {
-                const lastIndex = prev.length - 1;
-                const last = prev[lastIndex];
-                if (last?.streaming) {
-                    return [
-                        ...prev.slice(0, lastIndex),
-                        {
-                            ...last,
-                            text: fullText,
-                            streaming: true
-                        }
-                    ];
+                const updatedMessages = prev.map((msg, index) => {
+                    // Remove showSummarize from original message
+                    if (msg === message) {
+                        return {
+                            ...msg,
+                            showSummarize: false
+                        };
+                    }
+            
+                    // Update placeholder streaming message
+                    if (index === prev.length - 1 && msg.streaming) {
+                        return {
+                            ...msg,
+                            streaming: false,
+                            summarized: true,
+                            showSummarize: false
+                        };
+                    }
+            
+                    return msg;
+                });
+            
+                return updatedMessages;
+            });
+            
+
+
+        } catch (err) {
+            console.error("Streaming error:", err);
+
+            setMessages(prev => {
+                if (prev.length && prev[prev.length - 1]?.streaming) {
+                    return prev.slice(0, -1); // Remove failed message
                 }
                 return prev;
             });
+
+            const errorMessage = {
+                text: "An error occurred while summarizing.",
+                fromUser: false
+            };
+            setMessages(prev => [...prev, errorMessage]);
         }
-
-        // Finalize the message
-        setMessages(prev => {
-            const lastIndex = prev.length - 1;
-            const last = prev[lastIndex];
-            if (last?.streaming) {
-                return [
-                    ...prev.slice(0, lastIndex),
-                    {
-                        ...last,
-                        streaming: false,
-                        summarized: true,
-                        showSummarize: false
-                    }
-                ];
-            }
-            return prev;
-        });
-
-    } catch (err) {
-        console.error("Streaming error:", err);
-
-        setMessages(prev => {
-            if (prev.length && prev[prev.length - 1]?.streaming) {
-                return prev.slice(0, -1); // Remove failed message
-            }
-            return prev;
-        });
-
-        const errorMessage = {
-            text: "An error occurred while summarizing.",
-            fromUser: false
-        };
-        setMessages(prev => [...prev, errorMessage]);
-    }
-};
+    };
 
 
     return (
