@@ -175,15 +175,18 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
         return null;
     }
 
-    const isSQL = message.type === "sql";
+    const isSQL = message.type === "sql" || message.type === "table";
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
 
-    const isTable = Array.isArray(message.executedResponse) && message.executedResponse.length > 0 && typeof message.executedResponse[0] === 'object';
+    const isTable = Array.isArray(message.executedResponse) &&
+        message.executedResponse.length > 0 &&
+        typeof message.executedResponse[0] === 'object';
 
     const convertToString = (input) => {
         if (typeof input === 'string') return input;
         if (Array.isArray(input)) return input.map(convertToString).join(', ');
-        if (typeof input === 'object' && input !== null) return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+        if (typeof input === 'object' && input !== null)
+            return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
         return String(input);
     };
 
@@ -198,7 +201,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     borderRadius: "8px"
                 }}
             >
-                {isSQL ? (
+                {/* {isSQL ? (
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
@@ -225,6 +228,37 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     </TableContainer>
                 ) : (
                     <Typography>{message.text}</Typography>
+                )} */}
+
+{isTable ? (
+                    <TableContainer component={Paper}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    {Object.keys(message.executedResponse[0]).map((key) => (
+                                        <TableCell key={key} sx={{ fontWeight: 'bold' }}>{key}</TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {message.executedResponse.map((row, rowIndex) => (
+                                    <TableRow key={rowIndex}>
+                                        {Object.values(row).map((value, colIndex) => (
+                                            <TableCell key={colIndex}>{convertToString(value)}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                ) : isSQL ? (
+                    <SyntaxHighlighter language="sql" style={dracula}>
+                        {message.text}
+                    </SyntaxHighlighter>
+                ) : (
+                    <Typography>
+                        {typeof message.executedResponse === 'string' ? message.executedResponse : message.text}
+                    </Typography>
                 )}
 
                 {message.showExecute && (

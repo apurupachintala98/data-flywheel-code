@@ -262,16 +262,14 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
                 let chunk = decoder.decode(value, { stream: true });
 
-                // Check for "end_of_stream"
                 const eosIndex = chunk.indexOf("end_of_stream");
                 if (eosIndex !== -1) {
-                    chunk = chunk.slice(0, eosIndex);  // Remove everything after "end_of_stream"
+                    chunk = chunk.slice(0, eosIndex);
                     isDone = true;
                 }
 
                 fullText += chunk;
 
-                // Update latest message with accumulated text
                 setMessages(prev => {
                     const lastIndex = prev.length - 1;
                     const last = prev[lastIndex];
@@ -288,35 +286,15 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     return prev;
                 });
             }
-
-            // setMessages(prev => {
-            //     const lastIndex = prev.length - 1;
-            //     const last = prev[lastIndex];
-            //     if (last?.streaming) {
-            //         return [
-            //             ...prev.slice(0, lastIndex),
-            //             {
-            //                 ...last,
-            //                 streaming: false,
-            //                 summarized: true,
-            //                 showSummarize: false
-            //             }
-            //         ];
-            //     }
-            //     return prev;
-            // });
-
             setMessages(prev => {
                 const updatedMessages = prev.map((msg, index) => {
-                    // Remove showSummarize from original message
                     if (msg === message) {
                         return {
                             ...msg,
                             showSummarize: false
                         };
                     }
-            
-                    // Update placeholder streaming message
+
                     if (index === prev.length - 1 && msg.streaming) {
                         return {
                             ...msg,
@@ -325,13 +303,13 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                             showSummarize: false
                         };
                     }
-            
+
                     return msg;
                 });
-            
+
                 return updatedMessages;
             });
-            
+
 
 
         } catch (err) {
