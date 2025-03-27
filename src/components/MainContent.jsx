@@ -193,7 +193,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         }
     };
 
-    const apiCortex = async () => {
+    const apiCortex = async (message) => {
         const payload = {
             query: {
                 aplctn_cd: "aedldocai",
@@ -207,7 +207,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     messages: [
                         {
                             role: "user",
-                            content: inputValue
+                            content: message.text
                         }
                     ]
                 },
@@ -273,6 +273,15 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     typeEffect();
                 }
             }
+
+            setMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.text === message.text
+                        ? { ...msg, summarized: true }
+                        : msg
+                )
+            );
+    
         } catch (err) {
             console.error("Streaming error:", err);
         }
