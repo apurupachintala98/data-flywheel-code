@@ -146,7 +146,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             const modelResponse = response?.response || "No valid response received.";
             const responseType = response?.type || "text";
             const prompt = response?.prompt || inputValue;
-            const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql',  prompt: prompt };
+            const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql', prompt: prompt };
             setMessages((prevMessages) => [...prevMessages, assistantMessage]);
 
         } catch (error) {
@@ -205,30 +205,30 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
     const apiCortex = async (message) => {
         const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
-    
+
         const payload = {
             query: {
-               aplctn_cd: "aedldocai",
-               app_id: "docai",
-               api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-               method: "cortex",
-               model: "llama3.1-70b-elevance",
-               sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
-               limit_convs: "0",
-               prompt: {
-                  messages: [
-                     {
-                        role: "user",
-                        content: message.prompt,
-                     }
-                  ]
-               },
-               app_lvl_prefix: "",
-               user_id: "",
-               session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
+                aplctn_cd: "aedldocai",
+                app_id: "docai",
+                api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+                method: "cortex",
+                model: "llama3.1-70b-elevance",
+                sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
+                limit_convs: "0",
+                prompt: {
+                    messages: [
+                        {
+                            role: "user",
+                            content: message.prompt,
+                        }
+                    ]
+                },
+                app_lvl_prefix: "",
+                user_id: "",
+                session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
             }
-         };
-    
+        };
+
         try {
             const response = await fetch("http://10.126.192.122:8340/api/cortex/complete", {
                 method: "POST",
@@ -237,17 +237,17 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 },
                 body: JSON.stringify(payload)
             });
-    
+
             if (!response.body) throw new Error("No stream in response.");
-    
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-    
+
             let fullText = '';
             let typingQueue = '';
             let isTyping = false;
             let isStreamEnded = false;
-    
+
             // Add a placeholder streaming message
             const placeholderMessage = {
                 text: '',
@@ -257,16 +257,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 streaming: true
             };
             setMessages(prev => [...prev, placeholderMessage]);
-    
+
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
                     isTyping = false;
                     return;
                 }
-    
+
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
-    
+
                 setMessages(prev => {
                     const lastIndex = prev.length - 1;
                     const last = prev[lastIndex];
@@ -275,22 +275,22 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     }
                     return prev;
                 });
-    
+
                 setTimeout(typeEffect, 30);
             };
-    
+
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
-    
-                const chunk = decoder.decode(value, { stream: true });
+
+                const chunk = decoder.decode(value); // FIXED: removed stream:true
                 const eosIndex = chunk.indexOf('end_of_stream');
                 const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
-    
+
                 fullText += validChunk;
                 typingQueue += validChunk;
                 if (eosIndex !== -1) isStreamEnded = true;
-    
+
                 if (!isTyping && typingQueue.length > 0) {
                     isTyping = true;
                     typeEffect();
@@ -308,7 +308,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 return prev;
             });
 
-    
         } catch (err) {
             console.error("Streaming error:", err);
             setMessages(prev => {
@@ -317,7 +316,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 }
                 return prev;
             });
-    
+
             const errorMessage = {
                 text: "An error occurred while summarizing.",
                 fromUser: false
@@ -325,10 +324,10 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             setMessages(prev => [...prev, errorMessage]);
         }
     };
-    
-    
 
-    
+
+
+
     return (
         <Box
             sx={{
