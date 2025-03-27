@@ -179,28 +179,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             const response = await ApiService.runExeSql(payload);
             const resultData = response?.data;
             const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
-
-            const convertToString = (input) => {
-                if (typeof input === 'string') return input;
-                if (Array.isArray(input)) return input.map(convertToString).join(', ');
-                if (typeof input === 'object') return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
-                return String(input);
-              };
-              const renderedResponse = isTable ? (
-                <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                  <thead>
-                    <tr>{Object.keys(resultData[0]).map(col => <th key={col}>{col}</th>)}</tr>
-                  </thead>
-                  <tbody>
-                    {resultData.map((row, i) => (
-                      <tr key={i}>
-                        {Object.values(row).map((val, j) => <td key={j}>{convertToString(val)}</td>)}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : convertToString(resultData);
-
             const executedMessage = {
                 text: sqlQuery.text,
                 fromUser: false,
