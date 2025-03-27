@@ -175,14 +175,15 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
         return null;
     }
 
-    const isSQL = message.type === "sql" || message.type === "table";
-    const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
+    const isSQL = message.type === "sql";
+    const hasTable =
+        Array.isArray(message.executedResponse) &&
+        message.executedResponse.length > 0 &&
+        typeof message.executedResponse[0] === 'object';
+        console.log(hasTable);
 
-   
-        console.log(message.executedResponse && Array.isArray(message.executedResponse)
-        && message.executedResponse.length > 0);
-
-       
+    const shouldShowFeedback =
+        message.type === "text" && !message.fromUser && (message.summarized || message.streaming);
 
     const convertToString = (input) => {
         if (typeof input === 'string') return input;
@@ -203,78 +204,82 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     borderRadius: "8px"
                 }}
             >
-                {isSQL ? (
-                    <SyntaxHighlighter language="sql" style={dracula}>
-                        {message.text}
-                    </SyntaxHighlighter>
-                ) : (message.executedResponse && Array.isArray(message.executedResponse)
-                && message.executedResponse.length > 0) ? (
-                        <div style={{
+                               {hasTable ? (
+                    <div
+                        style={{
                             display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'start',
+                            flexDirection: 'row',
+                            alignItems: 'flex-start',
                             backgroundColor: 'white',
                             borderRadius: '12px',
                             padding: '12px',
                             boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
                             overflowX: 'auto',
                             maxWidth: '100%'
-                        }}>
-                            <table style={{
+                        }}
+                    >
+                        <table
+                            style={{
                                 borderCollapse: 'collapse',
-                                width: '100%',
                                 fontSize: '14px',
                                 fontFamily: 'Arial, sans-serif',
                                 color: '#000',
-                                tableLayout: 'fixed'
-                            }}>
-                                <thead>
-                                    <tr>
-                                        {Object.keys(message.executedResponse[0]).map((column) => (
-                                            <th
-                                                key={column}
+                                tableLayout: 'fixed',
+                                minWidth: '400px'
+                            }}
+                        >
+                            <thead>
+                                <tr>
+                                    {Object.keys(message.executedResponse[0]).map((column) => (
+                                        <th
+                                            key={column}
+                                            style={{
+                                                border: '1px solid #000',
+                                                padding: '8px',
+                                                textAlign: 'left',
+                                                fontWeight: 'bold',
+                                                color: '#001f5b',
+                                                backgroundColor: '#fff'
+                                            }}
+                                        >
+                                            {column}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {message.executedResponse.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        {Object.keys(row).map((colKey) => (
+                                            <td
+                                                key={`${rowIndex}-${colKey}`}
                                                 style={{
                                                     border: '1px solid #000',
                                                     padding: '8px',
-                                                    textAlign: 'left',
-                                                    backgroundColor: '#fff',
-                                                    fontWeight: 'bold',
-                                                    color: '#001f5b'
+                                                    textAlign: typeof row[colKey] === 'number' ? 'right' : 'left',
+                                                    backgroundColor: '#fff'
                                                 }}
                                             >
-                                                {column}
-                                            </th>
+                                                {convertToString(row[colKey])}
+                                            </td>
                                         ))}
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {message.executedResponse.map((row, rowIndex) => (
-                                        <tr key={rowIndex}>
-                                            {Object.keys(row).map((colKey) => (
-                                                <td
-                                                    key={`${rowIndex}-${colKey}`}
-                                                    style={{
-                                                        border: '1px solid #000',
-                                                        padding: '8px',
-                                                        textAlign: typeof row[colKey] === 'number' ? 'right' : 'left',
-                                                        backgroundColor: '#fff'
-                                                    }}
-                                                >
-                                                    {convertToString(row[colKey])}
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <Typography>
-                            {typeof message.executedResponse === 'string'
-                                ? message.executedResponse
-                                : message.text}
-                        </Typography>
-                    )}
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : isSQL ? (
+                    <SyntaxHighlighter language="sql" style={dracula}>
+                        {message.text}
+                    </SyntaxHighlighter>
+                ) : (
+                    <Typography>
+                        {typeof message.executedResponse === 'string'
+                            ? message.executedResponse
+                            : message.text}
+                    </Typography>
+                )}
+
                 {message.showExecute && (
                     <Button
                         variant="contained"
