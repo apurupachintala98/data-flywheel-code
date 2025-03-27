@@ -180,23 +180,55 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             const resultData = response?.data;
             const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
 
-            const executedMessage = {
+            const convertToString = (input) => {
+                if (typeof input === 'string') return input;
+                if (Array.isArray(input)) return input.map(convertToString).join(', ');
+                if (typeof input === 'object') return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+                return String(input);
+              };
+              const renderedResponse = isTable ? (
+                <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                  <thead>
+                    <tr>{Object.keys(resultData[0]).map(col => <th key={col}>{col}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {resultData.map((row, i) => (
+                      <tr key={i}>
+                        {Object.values(row).map((val, j) => <td key={j}>{convertToString(val)}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : convertToString(resultData);
+
+            // const executedMessage = {
+            //     text: sqlQuery.text,
+            //     fromUser: false,
+            //     executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+            //     type: isTable ? "table" : "result",
+            //     showExecute: false,
+            //     showSummarize: true,
+            //     prompt: sqlQuery.prompt
+            // };
+
+            setMessages((prev) => [...prev, {
                 text: sqlQuery.text,
                 fromUser: false,
-                executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+                executedResponse: resultData,
+                content: renderedResponse,
                 type: isTable ? "table" : "result",
                 showExecute: false,
                 showSummarize: true,
                 prompt: sqlQuery.prompt
-            };
+              }]);
             // setMessages((prevMessages) => [...prevMessages, executedMessage]);
-            setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.text === sqlQuery.text
-                        ? { ...msg, showExecute: false }
-                        : msg
-                ).concat(executedMessage)
-            );
+            // setMessages((prevMessages) =>
+            //     prevMessages.map((msg) =>
+            //         msg.text === sqlQuery.text
+            //             ? { ...msg, showExecute: false }
+            //             : msg
+            //     ).concat(executedMessage)
+            // );
 
         } catch (error) {
             console.error("Error executing SQL:", error);

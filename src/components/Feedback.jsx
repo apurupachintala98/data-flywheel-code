@@ -119,16 +119,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     }
 
     const isSQL = message.type === "sql";
-    const isTable =
-        Array.isArray(message.executedResponse) &&
-        message.executedResponse.length > 0 &&
-        typeof message.executedResponse[0] === 'object';
-
-    console.log(message.executedResponse);
-
-    const shouldShowFeedback =
-        !isSQL || (message.executedResponse && message.summarized);
-
+    const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
     return (
         <div className="mb-4">
             <div
@@ -144,33 +135,8 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
-                ) : isTable ? (
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    {Object.keys(message.executedResponse[0]).map((key) => (
-                                        <TableCell key={key} sx={{ fontWeight: 'bold' }}>
-                                            {key}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {message.executedResponse.map((row, rowIndex) => (
-                                    <TableRow key={rowIndex}>
-                                        {Object.values(row).map((value, colIndex) => (
-                                            <TableCell key={colIndex}>
-                                                {String(value)}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
                 ) : (
-                    <Typography>{message.executedResponse || message.text}</Typography>
+                    <Typography>{message.text}</Typography>
                 )}
 
                 {message.showExecute && (
@@ -196,7 +162,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                 )}
 
             </div>
-            {message.type === 'text' && !message.fromUser && (message.summarized || message.streaming) && (
+            {message.type === 'text' && !message.fromUser && shouldShowFeedback && (
                 <Feedback message={message} />
             )}
 
