@@ -185,7 +185,15 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 showExecute: false,
                 showSummarize: true
             };
-            setMessages((prevMessages) => [...prevMessages, executedMessage]);
+            // setMessages((prevMessages) => [...prevMessages, executedMessage]);
+            setMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.text === sqlQuery.text
+                        ? { ...msg, showExecute: false, showSummarize: true }
+                        : msg
+                ).concat(executedMessage)
+            );
+            
         } catch (error) {
             console.error("Error executing SQL:", error);
             const errorMessage = { text: "Error executing SQL query.", fromUser: false };
@@ -207,7 +215,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     messages: [
                         {
                             role: "user",
-                            content: message.text
+                            content: message.executedResponse
                         }
                     ]
                 },
@@ -277,7 +285,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                     msg.text === message.text
-                        ? { ...msg, summarized: true }
+                        ? { ...msg, summarized: true, showSummarize: false }
                         : msg
                 )
             );
@@ -286,10 +294,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             console.error("Streaming error:", err);
         }
     };
-
-
-
-
 
     return (
         <Box
