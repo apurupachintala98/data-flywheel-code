@@ -315,94 +315,87 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         let buffer = '';
         let typingQueue = '';
         let isTyping = false;
+        let isDone = false;
 
-        const placeholderMessage = {
-            text: '',
-            fromUser: false,
-            summarized: true,
-            type: 'text',
-            streaming: true
-        };
-        setMessages(prev => [...prev, placeholderMessage]);
+        setMessages(prev => [
+            ...prev,
+            {
+                text: '',
+                fromUser: false,
+                summarized: true,
+                type: 'text',
+                streaming: true
+            }
+        ]);
 
-        const typeEffect = () => {
-            if (typingQueue.length === 0) {
-                isTyping = false;
-                return;
+        while (!isDone) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+
+            // Check for "end_of_stream"
+            if (chunk.includes("end_of_stream")) {
+                isDone = true;
             }
 
-            const nextChar = typingQueue.charAt(0);
-            typingQueue = typingQueue.slice(1);
+            // Clean chunk (remove control tokens)
+            const cleanChunk = chunk.replace("end_of_stream", "");
 
+            fullText += cleanChunk;
+
+            // Update the latest message with new text
             setMessages(prev => {
                 const lastIndex = prev.length - 1;
                 const last = prev[lastIndex];
                 if (last?.streaming) {
                     return [
                         ...prev.slice(0, lastIndex),
-                        { ...last, text: last.text + nextChar }
+                        {
+                            ...last,
+                            text: fullText,
+                            streaming: true
+                        }
                     ];
                 }
                 return prev;
             });
-
-            setTimeout(typeEffect, 30);
-        };
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true });
-            buffer += chunk;
-
-            // Optional: look for "end_of_stream" and clean it
-            const eosIndex = buffer.indexOf('end_of_stream');
-            if (eosIndex !== -1) {
-                buffer = buffer.slice(0, eosIndex);
-            }
-
-            // Accumulate clean text
-            fullText += buffer;
-            typingQueue += buffer;
-            buffer = '';
-
-            if (!isTyping && typingQueue.length > 0) {
-                isTyping = true;
-                typeEffect();
-            }
-
-            if (eosIndex !== -1) break;
         }
 
-        // Finalize the streaming message
+        // Finalize the message
         setMessages(prev => {
-            const last = prev[prev.length - 1];
+            const lastIndex = prev.length - 1;
+            const last = prev[lastIndex];
             if (last?.streaming) {
                 return [
-                    ...prev.slice(0, -1),
-                    { ...last, streaming: false, summarized: true, showSummarize: false }
+                    ...prev.slice(0, lastIndex),
+                    {
+                        ...last,
+                        streaming: false,
+                        summarized: true,
+                        showSummarize: false
+                    }
                 ];
             }
             return prev;
         });
 
-        } catch (err) {
-            console.error("Streaming error:", err);
-            setMessages(prev => {
-                if (prev.length && prev[prev.length - 1]?.streaming) {
-                    return prev.slice(0, -1); // Remove failed placeholder
-                }
-                return prev;
-            });
+    } catch (err) {
+        console.error("Streaming error:", err);
 
-            const errorMessage = {
-                text: "An error occurred while summarizing.",
-                fromUser: false
-            };
-            setMessages(prev => [...prev, errorMessage]);
-        }
-    };
+        setMessages(prev => {
+            if (prev.length && prev[prev.length - 1]?.streaming) {
+                return prev.slice(0, -1); // remove placeholder
+            }
+            return prev;
+        });
+
+        const errorMessage = {
+            text: "An error occurred while summarizing.",
+            fromUser: false
+        };
+        setMessages(prev => [...prev, errorMessage]);
+    }    };
 
 
 
