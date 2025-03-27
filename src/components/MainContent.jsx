@@ -328,7 +328,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             let isStreamEnded = false;
     
             // Add initial assistant message so we can stream characters into it
-            setChatLog(prev => [...prev, { role: 'assistant', content: '' }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
     
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
