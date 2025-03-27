@@ -119,25 +119,25 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         setSubmitted(true);
 
         const payload = {
-                "query": {
-                  "aplctn_cd": "aedldocai",
-                  "app_id": "docai",
-                  "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-                  "model": "llama3.1-70b",
-                  "semantic_model": selectedYamlModels,
-                  "search_service": selectedSearchModels,
-                  "search_limit": 0,
-                  "prompt": {
+            "query": {
+                "aplctn_cd": "aedldocai",
+                "app_id": "docai",
+                "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+                "model": "llama3.1-70b",
+                "semantic_model": selectedYamlModels,
+                "search_service": selectedSearchModels,
+                "search_limit": 0,
+                "prompt": {
                     "messages": [
-                      {
-                        "role": "user",
-                        "content": inputValue
-                      }
+                        {
+                            "role": "user",
+                            "content": inputValue
+                        }
                     ]
-                  },
-                  "app_lvl_prefix": "",
-                  "session_id": "ec2aebd4-0a7e-415f-a26b-5b663fc9356c"
-              }
+                },
+                "app_lvl_prefix": "",
+                "session_id": "ec2aebd4-0a7e-415f-a26b-5b663fc9356c"
+            }
         };
         try {
             const response = await ApiService.sendTextToSQL(payload);
@@ -156,41 +156,36 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const executeSQL = async (sqlQuery) => {
         const payload = {
             "query": {
-              "aplctn_cd": "aedldocai",
-              "app_id": "docai",
-              "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-              "prompt": {
-                "messages": [
-                  {
-                    "role": "user",
-                    "content": ""
-                  }
-                ]
-              },
-              "app_lvl_prefix": "",
-              "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
-              "exec_sql": sqlQuery.text
+                "aplctn_cd": "aedldocai",
+                "app_id": "docai",
+                "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+                "prompt": {
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": ""
+                        }
+                    ]
+                },
+                "app_lvl_prefix": "",
+                "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
+                "exec_sql": sqlQuery.text
             }
-          }
+        }
         try {
             const response = await ApiService.runExeSql(payload);
             const resultData = response?.data;
             const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
 
-            setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.text === sqlQuery.text
-                        ? {
-                            ...msg,
-                            text: msg.text,  // Keep the original SQL response
-                            executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),  // Store the execution result separately
-                            type: isTable ? "table" : "result",
-                            showExecute: false,  // Hide Execute SQL button
-                            showSummarize: true  // Show Summarize button
-                        }
-                        : msg
-                )
-            );
+            const executedMessage = {
+                text: sqlQuery.text,
+                fromUser: false,
+                executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+                type: isTable ? "table" : "result",
+                showExecute: false,
+                showSummarize: true
+            };
+            setMessages((prevMessages) => [...prevMessages, executedMessage]);
         } catch (error) {
             console.error("Error executing SQL:", error);
             const errorMessage = { text: "Error executing SQL query.", fromUser: false };
@@ -201,46 +196,46 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const apiCortex = async () => {
         const payload = {
             query: {
-            aplctn_cd: "aedldocai",
-            app_id: "docai",
-            api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-            method: "cortex",
-            model: "llama3.1-70b-elevance",
-            sys_msg: "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.",
-            limit_convs: "0",
-            prompt: {
-                messages: [
-                    {
-                        role: "user",
-                        content: inputValue
-                    }
-                ]
-            },
-            app_lvl_prefix: "",
-            user_id: "",
-            session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
-        }
+                aplctn_cd: "aedldocai",
+                app_id: "docai",
+                api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+                method: "cortex",
+                model: "llama3.1-70b-elevance",
+                sys_msg: "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.",
+                limit_convs: "0",
+                prompt: {
+                    messages: [
+                        {
+                            role: "user",
+                            content: inputValue
+                        }
+                    ]
+                },
+                app_lvl_prefix: "",
+                user_id: "",
+                session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
+            }
         };
-        
+
         try {
             const response = await ApiService.postCortexPrompt(payload);
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-    
+
             let fullText = '';
             let typingQueue = '';
             let isTyping = false;
             let isStreamEnded = false;
-    
+
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
                     isTyping = false;
                     return;
                 }
-    
+
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
-    
+
                 setMessages((prev) => {
                     const last = prev[prev.length - 1];
                     if (last && !last.fromUser) {
@@ -252,16 +247,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                         return [...prev, { text: nextChar, fromUser: false }];
                     }
                 });
-    
+
                 setTimeout(typeEffect, 30);
             };
-    
+
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
-    
+
                 let chunk = decoder.decode(value, { stream: true });
-    
+
                 // Check if "end_of_stream" is present
                 const eosIndex = chunk.indexOf('end_of_stream');
                 if (eosIndex !== -1) {
@@ -269,10 +264,10 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     chunk = chunk.slice(0, eosIndex);
                     isStreamEnded = true;
                 }
-    
+
                 fullText += chunk;
                 typingQueue += chunk;
-    
+
                 if (!isTyping && typingQueue.length > 0) {
                     isTyping = true;
                     typeEffect();
@@ -282,8 +277,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             console.error("Streaming error:", err);
         }
     };
-    
-    
+
+
 
 
 
