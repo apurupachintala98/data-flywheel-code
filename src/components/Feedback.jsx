@@ -178,17 +178,17 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     const isSQL = message.type === "sql" || message.type === "table";
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
 
-    const isTable = Array.isArray(message.executedResponse) &&
-        message.executedResponse.length > 0 &&
-        typeof message.executedResponse[0] === 'object';
+    const isTable = Array.isArray(message.executedResponse)
+    && message.executedResponse.length > 0
+    && typeof message.executedResponse[0] === 'object';
 
-    const convertToString = (input) => {
-        if (typeof input === 'string') return input;
-        if (Array.isArray(input)) return input.map(convertToString).join(', ');
-        if (typeof input === 'object' && input !== null)
-            return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
-        return String(input);
-    };
+const convertToString = (input) => {
+    if (typeof input === 'string') return input;
+    if (Array.isArray(input)) return input.map(convertToString).join(', ');
+    if (typeof input === 'object' && input !== null)
+        return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+    return String(input);
+};
 
     return (
         <div className="mb-4">
@@ -230,14 +230,19 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     <Typography>{message.text}</Typography>
                 )} */}
               {isTable ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', overflowX: 'auto' }}>
-                        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '500px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '600px' }}>
                             <thead>
                                 <tr>
                                     {Object.keys(message.executedResponse[0]).map((column) => (
                                         <th
                                             key={column}
-                                            style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left', backgroundColor: '#f0f0f0' }}
+                                            style={{
+                                                border: '1px solid #ccc',
+                                                padding: '8px',
+                                                backgroundColor: '#f0f0f0',
+                                                textAlign: 'left'
+                                            }}
                                         >
                                             {column}
                                         </th>
@@ -247,37 +252,26 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                             <tbody>
                                 {message.executedResponse.map((row, rowIndex) => (
                                     <tr key={rowIndex}>
-                                        {Object.keys(row).map((column) => (
-                                            <td key={`${rowIndex}-${column}`} style={{ border: '1px solid #ddd', padding: '8px' }}>
-                                                {convertToString(row[column])}
+                                        {Object.keys(row).map((colKey) => (
+                                            <td
+                                                key={`${rowIndex}-${colKey}`}
+                                                style={{ border: '1px solid #ddd', padding: '8px' }}
+                                            >
+                                                {convertToString(row[colKey])}
                                             </td>
                                         ))}
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-
-                        {(message.executedResponse.length > 1 && Object.keys(message.executedResponse[0]).length > 1) && (
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
-                                onClick={() => console.log("Graph View clicked")}
-                            >
-                                Graph View
-                            </Button>
-                        )}
                     </div>
-                ) : isSQL ? (
-                    <SyntaxHighlighter language="sql" style={dracula}>
-                        {message.text}
-                    </SyntaxHighlighter>
                 ) : (
                     <Typography>
-                        {typeof message.executedResponse === 'string' ? message.executedResponse : message.text}
+                        {typeof message.executedResponse === 'string'
+                            ? message.executedResponse
+                            : message.text}
                     </Typography>
                 )}
-
                 {message.showExecute && (
                     <Button
                         variant="contained"
