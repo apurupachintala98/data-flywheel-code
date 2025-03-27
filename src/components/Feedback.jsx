@@ -170,42 +170,194 @@ const Feedback = ({ message }) => {
 //     );
 // };
 
+// const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
+//     if (!message?.text) {
+//         return null;
+//     }
+
+//     const isSQL = message.type === "sql";
+//     console.log(message.executedResponse);
+//     const hasTable =
+//         Array.isArray(message.executedResponse) &&
+//         message.executedResponse.length > 0 &&
+//         typeof message.executedResponse[0] === 'object';
+//         console.log(hasTable);
+
+//     const shouldShowFeedback =
+//         message.type === "text" && !message.fromUser && (message.summarized || message.streaming);
+
+//     const convertToString = (input) => {
+//         if (typeof input === 'string') return input;
+//         if (Array.isArray(input)) return input.map(convertToString).join(', ');
+//         if (typeof input === 'object' && input !== null)
+//             return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+//         return String(input);
+//     };
+
+//     return (
+//         <div className="mb-4">
+//             <div
+//                 className={`p-2 rounded-lg ${message.fromUser ? 'bg-blue-500 text-white' : isSQL ? 'bg-gray-900 text-white' : 'bg-gray-200 text-black'}`}
+//                 style={{
+//                     fontFamily: "ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol",
+//                     textAlign: "left",
+//                     padding: isSQL ? '12px' : '8px',
+//                     borderRadius: "8px"
+//                 }}
+//             >
+//                                {hasTable ? (
+//                     <div
+//                         style={{
+//                             display: 'flex',
+//                             flexDirection: 'row',
+//                             alignItems: 'flex-start',
+//                             backgroundColor: 'white',
+//                             borderRadius: '12px',
+//                             padding: '12px',
+//                             boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+//                             overflowX: 'auto',
+//                             maxWidth: '100%'
+//                         }}
+//                     >
+//                         <table
+//                             style={{
+//                                 borderCollapse: 'collapse',
+//                                 fontSize: '14px',
+//                                 fontFamily: 'Arial, sans-serif',
+//                                 color: '#000',
+//                                 tableLayout: 'fixed',
+//                                 minWidth: '400px'
+//                             }}
+//                         >
+//                             <thead>
+//                                 <tr>
+//                                     {Object.keys(message.executedResponse[0]).map((column) => (
+//                                         <th
+//                                             key={column}
+//                                             style={{
+//                                                 border: '1px solid #000',
+//                                                 padding: '8px',
+//                                                 textAlign: 'left',
+//                                                 fontWeight: 'bold',
+//                                                 color: '#001f5b',
+//                                                 backgroundColor: '#fff'
+//                                             }}
+//                                         >
+//                                             {column}
+//                                         </th>
+//                                     ))}
+//                                 </tr>
+//                             </thead>
+//                             <tbody>
+//                                 {message.executedResponse.map((row, rowIndex) => (
+//                                     <tr key={rowIndex}>
+//                                         {Object.keys(row).map((colKey) => (
+//                                             <td
+//                                                 key={`${rowIndex}-${colKey}`}
+//                                                 style={{
+//                                                     border: '1px solid #000',
+//                                                     padding: '8px',
+//                                                     textAlign: typeof row[colKey] === 'number' ? 'right' : 'left',
+//                                                     backgroundColor: '#fff'
+//                                                 }}
+//                                             >
+//                                                 {convertToString(row[colKey])}
+//                                             </td>
+//                                         ))}
+//                                     </tr>
+//                                 ))}
+//                             </tbody>
+//                         </table>
+//                     </div>
+//                 ) : isSQL ? (
+//                     <SyntaxHighlighter language="sql" style={dracula}>
+//                         {message.text}
+//                     </SyntaxHighlighter>
+//                 ) : (
+//                     <Typography>
+//                         {typeof message.executedResponse === 'string'
+//                             ? message.executedResponse
+//                             : message.text}
+//                     </Typography>
+//                 )}
+
+//                 {message.showExecute && (
+//                     <Button
+//                         variant="contained"
+//                         color="#000"
+//                         sx={{ marginTop: '10px' }}
+//                         onClick={() => executeSQL(message)}
+//                     >
+//                         Execute SQL
+//                     </Button>
+//                 )}
+
+//                 {message.showSummarize && (
+//                     <Button
+//                         variant="contained"
+//                         color="#000"
+//                         sx={{ marginTop: '10px' }}
+//                         onClick={() => apiCortex(message)}
+//                     >
+//                         Summarize
+//                     </Button>
+//                 )}
+
+//             </div>
+//             {message.type === 'text' && !message.fromUser && shouldShowFeedback && (
+//                 <Feedback message={message} />
+//             )}
+
+//         </div>
+//     );
+// };
+
 const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     if (!message?.text) {
         return null;
     }
 
     const isSQL = message.type === "sql";
-    console.log(message.executedResponse);
+
     const hasTable =
         Array.isArray(message.executedResponse) &&
         message.executedResponse.length > 0 &&
         typeof message.executedResponse[0] === 'object';
-        console.log(hasTable);
 
     const shouldShowFeedback =
-        message.type === "text" && !message.fromUser && (message.summarized || message.streaming);
+        message.type === "text" &&
+        !message.fromUser &&
+        (message.summarized || message.streaming);
 
     const convertToString = (input) => {
         if (typeof input === 'string') return input;
         if (Array.isArray(input)) return input.map(convertToString).join(', ');
         if (typeof input === 'object' && input !== null)
-            return Object.entries(input).map(([k, v]) => `${k}: ${convertToString(v)}`).join(', ');
+            return Object.entries(input)
+                .map(([k, v]) => `${k}: ${convertToString(v)}`)
+                .join(', ');
         return String(input);
     };
 
     return (
         <div className="mb-4">
             <div
-                className={`p-2 rounded-lg ${message.fromUser ? 'bg-blue-500 text-white' : isSQL ? 'bg-gray-900 text-white' : 'bg-gray-200 text-black'}`}
+                className={`p-2 rounded-lg ${
+                    message.fromUser
+                        ? 'bg-blue-500 text-white'
+                        : isSQL
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-gray-200 text-black'
+                }`}
                 style={{
-                    fontFamily: "ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol",
-                    textAlign: "left",
+                    fontFamily:
+                        'ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Arial,sans-serif',
+                    textAlign: 'left',
                     padding: isSQL ? '12px' : '8px',
-                    borderRadius: "8px"
+                    borderRadius: '8px'
                 }}
             >
-                               {hasTable ? (
+                {hasTable ? (
                     <div
                         style={{
                             display: 'flex',
@@ -219,6 +371,9 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                             maxWidth: '100%'
                         }}
                     >
+                        {/* Optional Bot Icon */}
+                        <div style={{ fontSize: '24px', marginRight: '12px' }}>🤖</div>
+
                         <table
                             style={{
                                 borderCollapse: 'collapse',
@@ -257,7 +412,10 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                                                 style={{
                                                     border: '1px solid #000',
                                                     padding: '8px',
-                                                    textAlign: typeof row[colKey] === 'number' ? 'right' : 'left',
+                                                    textAlign:
+                                                        typeof row[colKey] === 'number'
+                                                            ? 'right'
+                                                            : 'left',
                                                     backgroundColor: '#fff'
                                                 }}
                                             >
@@ -302,14 +460,12 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                         Summarize
                     </Button>
                 )}
-
             </div>
-            {message.type === 'text' && !message.fromUser && shouldShowFeedback && (
-                <Feedback message={message} />
-            )}
 
+            {shouldShowFeedback && <Feedback message={message} />}
         </div>
     );
 };
+
 
 export default MessageWithFeedback;
