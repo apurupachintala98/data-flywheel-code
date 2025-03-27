@@ -170,7 +170,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     </Table>
                   </TableContainer>
                 ) : (
-                    <Typography>{message.executedResponse || message.text}</Typography>
+                    <Typography>{message.text}</Typography>
                 )}
 
                 {message.showExecute && (

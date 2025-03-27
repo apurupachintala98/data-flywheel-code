@@ -215,7 +215,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     messages: [
                         {
                             role: "user",
-                            content: message.executedResponse
+                            content: JSON.stringify(message.executedResponse)
                         }
                     ]
                 },
@@ -283,18 +283,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             }
 
             setMessages((prevMessages) =>
-                prevMessages
-                    .map((msg) =>
-                        msg.text === message.text
-                            ? { ...msg, summarized: true, showSummarize: false }
-                            : msg
-                    )
-                    .concat({
-                        text: fullText,
-                        fromUser: false,
-                        summarized: true,
-                        type: 'text',
-                    })
+                prevMessages.map((msg) =>
+                    msg.text === message.text && msg.executedResponse === message.executedResponse
+                        ? { ...msg, summarized: true, showSummarize: false }
+                        : msg
+                ).concat({
+                    text: fullText, // this is the streamed result
+                    fromUser: false,
+                    summarized: true,
+                    type: 'text',
+                })
             );
 
 
