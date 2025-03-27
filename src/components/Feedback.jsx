@@ -176,6 +176,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     }
 
     const isSQL = message.type === "sql";
+    console.log(message.executedResponse);
     const hasTable =
         Array.isArray(message.executedResponse) &&
         message.executedResponse.length > 0 &&
