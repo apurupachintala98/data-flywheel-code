@@ -239,82 +239,10 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             });
 
             if (!response.body) throw new Error("No stream in response.");
-
-            // const reader = response.body.getReader();
-            // const decoder = new TextDecoder();
-
-            // let fullText = '';
-            // let typingQueue = '';
-            // let isTyping = false;
-            // let isStreamEnded = false;
-
-            // // Add a placeholder streaming message
-            // const placeholderMessage = {
-            //     text: '',
-            //     fromUser: false,
-            //     summarized: true,
-            //     type: 'text',
-            //     streaming: true
-            // };
-            // setMessages(prev => [...prev, placeholderMessage]);
-
-            // const typeEffect = () => {
-            //     if (typingQueue.length === 0) {
-            //         isTyping = false;
-            //         return;
-            //     }
-
-            //     const nextChar = typingQueue.charAt(0);
-            //     typingQueue = typingQueue.slice(1);
-
-            //     setMessages(prev => {
-            //         const lastIndex = prev.length - 1;
-            //         const last = prev[lastIndex];
-            //         if (last?.streaming) {
-            //             return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
-            //         }
-            //         return prev;
-            //     });
-
-            //     setTimeout(typeEffect, 30);
-            // };
-
-            // while (!isStreamEnded) {
-            //     const { done, value } = await reader.read();
-            //     if (done) break;
-
-            //     const chunk = decoder.decode(value); // FIXED: removed stream:true
-            //     const eosIndex = chunk.indexOf('end_of_stream');
-            //     const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
-
-            //     fullText += validChunk;
-            //     typingQueue += validChunk;
-            //     if (eosIndex !== -1) isStreamEnded = true;
-
-            //     if (!isTyping && typingQueue.length > 0) {
-            //         isTyping = true;
-            //         typeEffect();
-            //     }
-            // }
-
-            // setMessages(prev => {
-            //     const last = prev[prev.length - 1];
-            //     if (last?.streaming) {
-            //         return [
-            //             ...prev.slice(0, -1),
-            //             { ...last, streaming: false, summarized: true, showSummarize: false }
-            //         ];
-            //     }
-            //     return prev;
-            // });
-
             const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
 
         let fullText = '';
-        let buffer = '';
-        let typingQueue = '';
-        let isTyping = false;
         let isDone = false;
 
         setMessages(prev => [
@@ -332,19 +260,18 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             const { value, done } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
+            let chunk = decoder.decode(value, { stream: true });
 
             // Check for "end_of_stream"
-            if (chunk.includes("end_of_stream")) {
+            const eosIndex = chunk.indexOf("end_of_stream");
+            if (eosIndex !== -1) {
+                chunk = chunk.slice(0, eosIndex);  // Remove everything after "end_of_stream"
                 isDone = true;
             }
 
-            // Clean chunk (remove control tokens)
-            const cleanChunk = chunk.replace("end_of_stream", "");
+            fullText += chunk;
 
-            fullText += cleanChunk;
-
-            // Update the latest message with new text
+            // Update latest message with accumulated text
             setMessages(prev => {
                 const lastIndex = prev.length - 1;
                 const last = prev[lastIndex];
@@ -385,7 +312,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
         setMessages(prev => {
             if (prev.length && prev[prev.length - 1]?.streaming) {
-                return prev.slice(0, -1); // remove placeholder
+                return prev.slice(0, -1); // Remove failed message
             }
             return prev;
         });
@@ -395,9 +322,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             fromUser: false
         };
         setMessages(prev => [...prev, errorMessage]);
-    }    };
-
-
+    }
+};
 
 
     return (
