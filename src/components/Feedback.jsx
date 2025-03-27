@@ -229,28 +229,45 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                 ) : (
                     <Typography>{message.text}</Typography>
                 )} */}
-
-{isTable ? (
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    {Object.keys(message.executedResponse[0]).map((key) => (
-                                        <TableCell key={key} sx={{ fontWeight: 'bold' }}>{key}</TableCell>
+              {isTable ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', overflowX: 'auto' }}>
+                        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '500px' }}>
+                            <thead>
+                                <tr>
+                                    {Object.keys(message.executedResponse[0]).map((column) => (
+                                        <th
+                                            key={column}
+                                            style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left', backgroundColor: '#f0f0f0' }}
+                                        >
+                                            {column}
+                                        </th>
                                     ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {message.executedResponse.map((row, rowIndex) => (
-                                    <TableRow key={rowIndex}>
-                                        {Object.values(row).map((value, colIndex) => (
-                                            <TableCell key={colIndex}>{convertToString(value)}</TableCell>
+                                    <tr key={rowIndex}>
+                                        {Object.keys(row).map((column) => (
+                                            <td key={`${rowIndex}-${column}`} style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                                {convertToString(row[column])}
+                                            </td>
                                         ))}
-                                    </TableRow>
+                                    </tr>
                                 ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                            </tbody>
+                        </table>
+
+                        {(message.executedResponse.length > 1 && Object.keys(message.executedResponse[0]).length > 1) && (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
+                                onClick={() => console.log("Graph View clicked")}
+                            >
+                                Graph View
+                            </Button>
+                        )}
+                    </div>
                 ) : isSQL ? (
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
