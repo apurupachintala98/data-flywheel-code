@@ -178,10 +178,11 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     const isSQL = message.type === "sql" || message.type === "table";
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
 
-    const isTable = Array.isArray(message.executedResponse)
+    const isTable = message.executedResponse && Array.isArray(message.executedResponse)
         && message.executedResponse.length > 0;
-
         console.log(isTable);
+
+       
 
     const convertToString = (input) => {
         if (typeof input === 'string') return input;
