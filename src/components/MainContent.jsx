@@ -240,73 +240,152 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
             if (!response.body) throw new Error("No stream in response.");
 
+            // const reader = response.body.getReader();
+            // const decoder = new TextDecoder();
+
+            // let fullText = '';
+            // let typingQueue = '';
+            // let isTyping = false;
+            // let isStreamEnded = false;
+
+            // // Add a placeholder streaming message
+            // const placeholderMessage = {
+            //     text: '',
+            //     fromUser: false,
+            //     summarized: true,
+            //     type: 'text',
+            //     streaming: true
+            // };
+            // setMessages(prev => [...prev, placeholderMessage]);
+
+            // const typeEffect = () => {
+            //     if (typingQueue.length === 0) {
+            //         isTyping = false;
+            //         return;
+            //     }
+
+            //     const nextChar = typingQueue.charAt(0);
+            //     typingQueue = typingQueue.slice(1);
+
+            //     setMessages(prev => {
+            //         const lastIndex = prev.length - 1;
+            //         const last = prev[lastIndex];
+            //         if (last?.streaming) {
+            //             return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
+            //         }
+            //         return prev;
+            //     });
+
+            //     setTimeout(typeEffect, 30);
+            // };
+
+            // while (!isStreamEnded) {
+            //     const { done, value } = await reader.read();
+            //     if (done) break;
+
+            //     const chunk = decoder.decode(value); // FIXED: removed stream:true
+            //     const eosIndex = chunk.indexOf('end_of_stream');
+            //     const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
+
+            //     fullText += validChunk;
+            //     typingQueue += validChunk;
+            //     if (eosIndex !== -1) isStreamEnded = true;
+
+            //     if (!isTyping && typingQueue.length > 0) {
+            //         isTyping = true;
+            //         typeEffect();
+            //     }
+            // }
+
+            // setMessages(prev => {
+            //     const last = prev[prev.length - 1];
+            //     if (last?.streaming) {
+            //         return [
+            //             ...prev.slice(0, -1),
+            //             { ...last, streaming: false, summarized: true, showSummarize: false }
+            //         ];
+            //     }
+            //     return prev;
+            // });
+
             const reader = response.body.getReader();
-            const decoder = new TextDecoder();
+        const decoder = new TextDecoder("utf-8");
 
-            let fullText = '';
-            let typingQueue = '';
-            let isTyping = false;
-            let isStreamEnded = false;
+        let fullText = '';
+        let buffer = '';
+        let typingQueue = '';
+        let isTyping = false;
 
-            // Add a placeholder streaming message
-            const placeholderMessage = {
-                text: '',
-                fromUser: false,
-                summarized: true,
-                type: 'text',
-                streaming: true
-            };
-            setMessages(prev => [...prev, placeholderMessage]);
+        const placeholderMessage = {
+            text: '',
+            fromUser: false,
+            summarized: true,
+            type: 'text',
+            streaming: true
+        };
+        setMessages(prev => [...prev, placeholderMessage]);
 
-            const typeEffect = () => {
-                if (typingQueue.length === 0) {
-                    isTyping = false;
-                    return;
-                }
-
-                const nextChar = typingQueue.charAt(0);
-                typingQueue = typingQueue.slice(1);
-
-                setMessages(prev => {
-                    const lastIndex = prev.length - 1;
-                    const last = prev[lastIndex];
-                    if (last?.streaming) {
-                        return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
-                    }
-                    return prev;
-                });
-
-                setTimeout(typeEffect, 30);
-            };
-
-            while (!isStreamEnded) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value); // FIXED: removed stream:true
-                const eosIndex = chunk.indexOf('end_of_stream');
-                const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
-
-                fullText += validChunk;
-                typingQueue += validChunk;
-                if (eosIndex !== -1) isStreamEnded = true;
-
-                if (!isTyping && typingQueue.length > 0) {
-                    isTyping = true;
-                    typeEffect();
-                }
+        const typeEffect = () => {
+            if (typingQueue.length === 0) {
+                isTyping = false;
+                return;
             }
 
+            const nextChar = typingQueue.charAt(0);
+            typingQueue = typingQueue.slice(1);
+
             setMessages(prev => {
-                const last = prev[prev.length - 1];
+                const lastIndex = prev.length - 1;
+                const last = prev[lastIndex];
                 if (last?.streaming) {
                     return [
-                        ...prev.slice(0, -1),
-                        { ...last, streaming: false, summarized: true, showSummarize: false }
+                        ...prev.slice(0, lastIndex),
+                        { ...last, text: last.text + nextChar }
                     ];
                 }
                 return prev;
             });
+
+            setTimeout(typeEffect, 30);
+        };
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            buffer += chunk;
+
+            // Optional: look for "end_of_stream" and clean it
+            const eosIndex = buffer.indexOf('end_of_stream');
+            if (eosIndex !== -1) {
+                buffer = buffer.slice(0, eosIndex);
+            }
+
+            // Accumulate clean text
+            fullText += buffer;
+            typingQueue += buffer;
+            buffer = '';
+
+            if (!isTyping && typingQueue.length > 0) {
+                isTyping = true;
+                typeEffect();
+            }
+
+            if (eosIndex !== -1) break;
+        }
+
+        // Finalize the streaming message
+        setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last?.streaming) {
+                return [
+                    ...prev.slice(0, -1),
+                    { ...last, streaming: false, summarized: true, showSummarize: false }
+                ];
+            }
+            return prev;
+        });
 
         } catch (err) {
             console.error("Streaming error:", err);
