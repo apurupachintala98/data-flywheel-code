@@ -124,6 +124,8 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     message.executedResponse.length > 0 &&
     typeof message.executedResponse[0] === 'object';
 
+    console.log(message.executedResponse);
+
     const shouldShowFeedback =
     !isSQL || (message.executedResponse && message.summarized);
 
