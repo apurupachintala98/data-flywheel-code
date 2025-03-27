@@ -26,6 +26,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [searchFiles, setSearchFiles] = useState([]); // State to store API data
     const [aggregatedResponse, setAggregatedResponse] = useState('');
     const [displayedText, setDisplayedText] = useState('');
+    const [promptQuestion, setPromptQuestion] = useState('');
+
     const typingSpeed = 60;
 
     useEffect(() => {
@@ -143,7 +145,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             const response = await ApiService.sendTextToSQL(payload);
             const modelResponse = response?.response || "No valid response received.";
             const responseType = response?.type || "text";
-            const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql' };
+            const prompt = response?.prompt || inputValue;
+            const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql',  prompt: prompt };
             setMessages((prevMessages) => [...prevMessages, assistantMessage]);
 
         } catch (error) {
@@ -163,7 +166,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     "messages": [
                         {
                             "role": "user",
-                            "content": ""
+                            "content": sqlQuery.prompt || sqlQuery.text
                         }
                     ]
                 },
@@ -183,7 +186,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
                 type: isTable ? "table" : "result",
                 showExecute: false,
-                showSummarize: true
+                showSummarize: true,
+                prompt: sqlQuery.prompt
             };
             // setMessages((prevMessages) => [...prevMessages, executedMessage]);
             setMessages((prevMessages) =>
@@ -201,7 +205,110 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         }
     };
 
+    // const apiCortex = async (message) => {
+    //     const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
+    //     const payload = {
+    //         query: {
+    //             aplctn_cd: "aedldocai",
+    //             app_id: "docai",
+    //             api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+    //             method: "cortex",
+    //             model: "llama3.1-70b-elevance",
+    //             sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
+    //             limit_convs: "0",
+    //             prompt: {
+    //                 messages: [
+    //                     {
+    //                         role: "user",
+    //                         content: message.prompt,
+    //                     }
+    //                 ]
+    //             },
+    //             app_lvl_prefix: "",
+    //             user_id: "",
+    //             session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
+    //         }
+    //     };
+
+    //     try {
+    //         const response = await ApiService.postCortexPrompt(payload);
+    //         const reader = response.body.getReader();
+    //         const decoder = new TextDecoder();
+
+    //         let fullText = '';
+    //         let typingQueue = '';
+    //         let isTyping = false;
+    //         let isStreamEnded = false;
+
+    //         const typeEffect = () => {
+    //             if (typingQueue.length === 0) {
+    //                 isTyping = false;
+    //                 return;
+    //             }
+
+    //             const nextChar = typingQueue.charAt(0);
+    //             typingQueue = typingQueue.slice(1);
+
+    //             setMessages((prev) => {
+    //                 const last = prev[prev.length - 1];
+    //                 if (last && !last.fromUser) {
+    //                     return [
+    //                         ...prev.slice(0, -1),
+    //                         { ...last, text: last.text + nextChar },
+    //                     ];
+    //                 } else {
+    //                     return [...prev, { text: nextChar, fromUser: false }];
+    //                 }
+    //             });
+
+    //             setTimeout(typeEffect, 30);
+    //         };
+
+    //         while (!isStreamEnded) {
+    //             const { done, value } = await reader.read();
+    //             if (done) break;
+
+    //             let chunk = decoder.decode(value, { stream: true });
+
+    //             // Check if "end_of_stream" is present
+    //             const eosIndex = chunk.indexOf('end_of_stream');
+    //             if (eosIndex !== -1) {
+    //                 // Only keep the part before "end_of_stream"
+    //                 chunk = chunk.slice(0, eosIndex);
+    //                 isStreamEnded = true;
+    //             }
+
+    //             fullText += chunk;
+    //             typingQueue += chunk;
+
+    //             if (!isTyping && typingQueue.length > 0) {
+    //                 isTyping = true;
+    //                 typeEffect();
+    //             }
+    //         }
+
+    //         setMessages((prevMessages) =>
+    //             prevMessages.map((msg) =>
+    //                 msg.text === message.text && msg.executedResponse === message.executedResponse
+    //                     ? { ...msg, summarized: true, showSummarize: false }
+    //                     : msg
+    //             ).concat({
+    //                 text: fullText, // this is the streamed result
+    //                 fromUser: false,
+    //                 summarized: true,
+    //                 type: 'text',
+    //             })
+    //         );
+
+
+    //     } catch (err) {
+    //         console.error("Streaming error:", err);
+    //     }
+    // };
+
     const apiCortex = async (message) => {
+        const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
+        
         const payload = {
             query: {
                 aplctn_cd: "aedldocai",
@@ -209,13 +316,13 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
                 method: "cortex",
                 model: "llama3.1-70b-elevance",
-                sys_msg: "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.",
+                sys_msg: `${sys_msg}${JSON.stringify(message.executedResponse)}`,
                 limit_convs: "0",
                 prompt: {
                     messages: [
                         {
                             role: "user",
-                            content: JSON.stringify(message.executedResponse)
+                            content: message.prompt,
                         }
                     ]
                 },
@@ -224,83 +331,104 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 session_id: "ad339c7f-feeb-49a3-a5b5-009152b47006"
             }
         };
-
+    
         try {
             const response = await ApiService.postCortexPrompt(payload);
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-
+    
             let fullText = '';
             let typingQueue = '';
             let isTyping = false;
             let isStreamEnded = false;
-
+    
+            // 1. Add a placeholder streaming message first
+            const placeholderMessage = {
+                text: '',
+                fromUser: false,
+                summarized: true,
+                type: 'text',
+                streaming: true
+            };
+            setMessages((prev) => [...prev, placeholderMessage]);
+    
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
                     isTyping = false;
                     return;
                 }
-
+    
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
-
+    
                 setMessages((prev) => {
-                    const last = prev[prev.length - 1];
-                    if (last && !last.fromUser) {
-                        return [
-                            ...prev.slice(0, -1),
-                            { ...last, text: last.text + nextChar },
-                        ];
-                    } else {
-                        return [...prev, { text: nextChar, fromUser: false }];
+                    const lastIndex = prev.length - 1;
+                    const last = prev[lastIndex];
+                    if (last && last.streaming) {
+                        const updated = { ...last, text: last.text + nextChar };
+                        return [...prev.slice(0, lastIndex), updated];
                     }
+                    return prev;
                 });
-
+    
                 setTimeout(typeEffect, 30);
             };
-
+    
+            // 2. Read streaming response
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
-
+    
                 let chunk = decoder.decode(value, { stream: true });
-
-                // Check if "end_of_stream" is present
+    
                 const eosIndex = chunk.indexOf('end_of_stream');
                 if (eosIndex !== -1) {
-                    // Only keep the part before "end_of_stream"
                     chunk = chunk.slice(0, eosIndex);
                     isStreamEnded = true;
                 }
-
+    
                 fullText += chunk;
                 typingQueue += chunk;
-
+    
                 if (!isTyping && typingQueue.length > 0) {
                     isTyping = true;
                     typeEffect();
                 }
             }
-
+    
+            // 3. Hide the "Summarize" button from the original SQL message
             setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                     msg.text === message.text && msg.executedResponse === message.executedResponse
                         ? { ...msg, summarized: true, showSummarize: false }
                         : msg
-                ).concat({
-                    text: fullText, // this is the streamed result
-                    fromUser: false,
-                    summarized: true,
-                    type: 'text',
-                })
+                )
             );
-
-
+    
+            // 4. Finalize the placeholder message
+            setMessages((prev) => {
+                const lastIndex = prev.length - 1;
+                const last = prev[lastIndex];
+                if (last && last.streaming) {
+                    const finalized = {
+                        ...last,
+                        streaming: false,
+                        summarized: true,
+                        showSummarize: false
+                    };
+                    return [...prev.slice(0, lastIndex), finalized];
+                }
+                return prev;
+            });
+    
         } catch (err) {
             console.error("Streaming error:", err);
+            const errorMessage = { text: "An error occurred while summarizing.", fromUser: false };
+            setMessages((prev) => [...prev, errorMessage]);
         }
     };
 
+    
     return (
         <Box
             sx={{
