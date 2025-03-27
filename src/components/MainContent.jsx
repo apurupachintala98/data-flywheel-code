@@ -240,83 +240,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
             if (!response.body) throw new Error("No stream in response.");
     
-            // const reader = response.body.getReader();
-            // const decoder = new TextDecoder();
-    
-            // let fullText = '';
-            // let typingQueue = '';
-            // let isTyping = false;
-            // let isStreamEnded = false;
-    
-            // // Add a placeholder streaming message
-            // const placeholderMessage = {
-            //     text: '',
-            //     fromUser: false,
-            //     summarized: true,
-            //     type: 'text',
-            //     streaming: true
-            // };
-            // setMessages(prev => [...prev, placeholderMessage]);
-    
-            // const typeEffect = () => {
-            //     if (typingQueue.length === 0) {
-            //         isTyping = false;
-            //         return;
-            //     }
-    
-            //     const nextChar = typingQueue.charAt(0);
-            //     typingQueue = typingQueue.slice(1);
-    
-            //     setMessages(prev => {
-            //         const lastIndex = prev.length - 1;
-            //         const last = prev[lastIndex];
-            //         if (last?.streaming) {
-            //             return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
-            //         }
-            //         return prev;
-            //     });
-    
-            //     setTimeout(typeEffect, 30);
-            // };
-    
-            // while (!isStreamEnded) {
-            //     const { done, value } = await reader.read();
-            //     if (done) break;
-    
-            //     const chunk = decoder.decode(value, { stream: true });
-            //     const eosIndex = chunk.indexOf('end_of_stream');
-            //     const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
-    
-            //     fullText += validChunk;
-            //     typingQueue += validChunk;
-            //     if (eosIndex !== -1) isStreamEnded = true;
-    
-            //     if (!isTyping && typingQueue.length > 0) {
-            //         isTyping = true;
-            //         typeEffect();
-            //     }
-            // }
-    
-            // // Remove summarize button and finalize stream
-            // setMessages(prev =>
-            //     prev.map(msg =>
-            //         msg.text === message.text && msg.executedResponse === message.executedResponse
-            //             ? { ...msg, summarized: true, showSummarize: false }
-            //             : msg
-            //     )
-            // );
-    
-            // setMessages(prev => {
-            //     const last = prev[prev.length - 1];
-            //     if (last?.streaming) {
-            //         return [
-            //             ...prev.slice(0, -1),
-            //             { ...last, streaming: false, summarized: true, showSummarize: false }
-            //         ];
-            //     }
-            //     return prev;
-            // });
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
     
@@ -325,8 +248,15 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             let isTyping = false;
             let isStreamEnded = false;
     
-            // Add initial assistant message so we can stream characters into it
-            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+            // Add a placeholder streaming message
+            const placeholderMessage = {
+                text: '',
+                fromUser: false,
+                summarized: true,
+                type: 'text',
+                streaming: true
+            };
+            setMessages(prev => [...prev, placeholderMessage]);
     
             const typeEffect = () => {
                 if (typingQueue.length === 0) {
@@ -336,43 +266,57 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
                 const nextChar = typingQueue.charAt(0);
                 typingQueue = typingQueue.slice(1);
+    
                 setMessages(prev => {
-                    const last = prev[prev.length - 1];
+                    const lastIndex = prev.length - 1;
+                    const last = prev[lastIndex];
                     if (last?.streaming) {
-                        return [
-                            ...prev.slice(0, -1),
-                            { ...last, content: last.content + nextChar, streaming: false, summarized: true, showSummarize: false }
-                        ];
+                        return [...prev.slice(0, lastIndex), { ...last, text: last.text + nextChar }];
                     }
                     return prev;
                 });
     
-                setTimeout(typeEffect, 30); // typing speed
+                setTimeout(typeEffect, 30);
             };
     
             while (!isStreamEnded) {
                 const { done, value } = await reader.read();
                 if (done) break;
     
-                let chunk = decoder.decode(value, { stream: true });
-    
+                const chunk = decoder.decode(value, { stream: true });
                 const eosIndex = chunk.indexOf('end_of_stream');
-                if (eosIndex !== -1) {
-                    chunk = chunk.slice(0, eosIndex);
-                    isStreamEnded = true;
-                }
+                const validChunk = eosIndex !== -1 ? chunk.slice(0, eosIndex) : chunk;
     
-                fullText += chunk;
-                typingQueue += chunk;
+                fullText += validChunk;
+                typingQueue += validChunk;
+                if (eosIndex !== -1) isStreamEnded = true;
     
                 if (!isTyping && typingQueue.length > 0) {
                     isTyping = true;
                     typeEffect();
                 }
             }
-
-              
     
+            // Remove summarize button and finalize stream
+            setMessages(prev =>
+                prev.map(msg =>
+                    msg.text === message.text && msg.executedResponse === message.executedResponse
+                        ? { ...msg, summarized: true, showSummarize: false }
+                        : msg
+                )
+            );
+    
+            setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.streaming) {
+                    return [
+                        ...prev.slice(0, -1),
+                        { ...last, streaming: false, summarized: true, showSummarize: false }
+                    ];
+                }
+                return prev;
+            });
+
     
         } catch (err) {
             console.error("Streaming error:", err);
