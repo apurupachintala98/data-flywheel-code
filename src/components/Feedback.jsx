@@ -119,7 +119,10 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     }
 
     const isSQL = message.type === "sql";
-    const isTable = message.type === "table" && Array.isArray(message.executedResponse) && message.executedResponse.length > 0;
+    const isTable =
+    Array.isArray(message.executedResponse) &&
+    message.executedResponse.length > 0 &&
+    typeof message.executedResponse[0] === 'object';
 
     return (
         <div className="mb-4">
@@ -164,7 +167,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                 {message.showExecute && (
                     <Button
                         variant="contained"
-                        color="primary"
+                        color="#000"
                         sx={{ marginTop: '10px' }}
                         onClick={() => executeSQL(message)}
                     >
@@ -175,7 +178,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                 {message.showSummarize && (
                     <Button
                         variant="contained"
-                        color="secondary"
+                        color="#000"
                         sx={{ marginTop: '10px' }}
                         onClick={() => apiCortex(message.text)}
                     >
