@@ -179,8 +179,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     const shouldShowFeedback = !isSQL || (message.summarized || message.streaming);
 
     const isTable = Array.isArray(message.executedResponse)
-        && message.executedResponse.length > 0
-        && typeof message.executedResponse[0] === 'object';
+        && message.executedResponse.length > 0;
 
         console.log(isTable);
 
