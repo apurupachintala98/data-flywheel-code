@@ -182,6 +182,8 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
         && message.executedResponse.length > 0
         && typeof message.executedResponse[0] === 'object';
 
+        console.log(isTable);
+
     const convertToString = (input) => {
         if (typeof input === 'string') return input;
         if (Array.isArray(input)) return input.map(convertToString).join(', ');
@@ -201,40 +203,11 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     borderRadius: "8px"
                 }}
             >
-                {/* {isSQL ? (
-                    <SyntaxHighlighter language="sql" style={dracula}>
-                        {message.text}
-                    </SyntaxHighlighter>
-                ) : isTable ? (
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    {Object.keys(message.executedResponse[0]).map((key) => (
-                                        <TableCell key={key} sx={{ fontWeight: 'bold' }}>{key}</TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {message.executedResponse.map((row, rowIndex) => (
-                                    <TableRow key={rowIndex}>
-                                        {Object.values(row).map((value, colIndex) => (
-                                            <TableCell key={colIndex}>{convertToString(value)}</TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                ) : (
-                    <Typography>{message.text}</Typography>
-                )} */}
                 {isSQL ? (
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
-                ) :
-                    isTable ? (
+                ) : isTable ? (
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',
