@@ -119,6 +119,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
     }
 
     const isSQL = message.type === "sql";
+    const isTable = message.type === "table" && Array.isArray(message.executedResponse) && message.executedResponse.length > 0;
 
     return (
         <div className="mb-4">
@@ -135,13 +136,13 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
-                ) : message.type === 'table' ? (
+                ) : isTable ? (
                     <TableContainer component={Paper}>
                         <Table>
                             <TableHead>
                                 <TableRow>
                                     {Object.keys(message.executedResponse[0]).map((key) => (
-                                        <TableCell key={key}>{key}</TableCell>
+                                       <TableCell key={key} sx={{ fontWeight: 'bold' }}>{key}</TableCell>
                                     ))}
                                 </TableRow>
                             </TableHead>
@@ -149,7 +150,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                                 {message.executedResponse.map((row, rowIndex) => (
                                     <TableRow key={rowIndex}>
                                         {Object.values(row).map((value, colIndex) => (
-                                            <TableCell key={colIndex}>{value}</TableCell>
+                                            <TableCell key={colIndex}>{String(value)}</TableCell>
                                         ))}
                                     </TableRow>
                                 ))}
