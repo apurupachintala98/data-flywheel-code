@@ -188,13 +188,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 showSummarize: true,
                 prompt: sqlQuery.prompt,
             };
-            setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.text === sqlQuery.text
-                        ? { ...msg, showExecute: false }
-                        : msg
-                ).concat(executedMessage)
-            );
+            // setMessages((prevMessages) =>
+            //     prevMessages.map((msg) =>
+            //         msg.text === sqlQuery.text
+            //             ? { ...msg, showExecute: false }
+            //             : msg
+            //     ).concat(executedMessage)
+            // );
+
+            setMessages((prevMessages) => [...prevMessages, executedMessage]);
+
 
         } catch (error) {
             console.error("Error executing SQL:", error);
