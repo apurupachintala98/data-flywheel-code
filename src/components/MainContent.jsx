@@ -189,7 +189,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                     msg.text === sqlQuery.text
-                        ? { ...msg, showExecute: false, showSummarize: true }
+                        ? { ...msg, showExecute: false }
                         : msg
                 ).concat(executedMessage)
             );
