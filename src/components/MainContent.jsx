@@ -788,21 +788,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                 onChange={handleFileChange}
                             />
 
-<Menu
-                                        anchorEl={anchorEl}
-                                        open={open}
-                                        onClose={handleClose}
-                                        anchorOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'left',
-                                        }}
-                                        transformOrigin={{
-                                            vertical: 'top',
-                                            horizontal: 'left',
-                                        }}
-                                    >
-                                        <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
-                                    </Menu>
 
                         </Box>
 
@@ -855,24 +840,55 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     >
                                         Search Service
                                     </Button>
-                                    <Button
-                                        variant="outlined"
-                                        onClick={handleUploadMenuClick}
-                                        rel="noopener noreferrer"
-                                        sx={{
-                                            borderRadius: "50px",
-                                            textTransform: "none",
-                                            fontSize: "14px",
-                                            padding: "6px 12px",
-                                            color: "#5d5d5d",
-                                            borderColor: "#5d5d5d",
-                                            fontSize: '13.3px'
-                                        }}
-                                    >
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="" class="h-[18px] w-[18px]"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3C12.5523 3 13 3.44772 13 4L13 11H20C20.5523 11 21 11.4477 21 12C21 12.5523 20.5523 13 20 13L13 13L13 20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20L11 13L4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11L11 11L11 4C11 3.44772 11.4477 3 12 3Z" fill="currentColor"></path></svg>
-                                        Upload your Data
-                                    </Button>
-                                 
+
+
+                                    <Box sx={{ position: 'relative' }}>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={handleUploadMenuClick}
+                                            rel="noopener noreferrer"
+                                            sx={{
+                                                borderRadius: "50px",
+                                                textTransform: "none",
+                                                fontSize: "14px",
+                                                padding: "6px 12px",
+                                                color: "#5d5d5d",
+                                                borderColor: "#5d5d5d",
+                                                fontSize: '13.3px'
+                                            }}
+                                        >
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="" class="h-[18px] w-[18px]"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3C12.5523 3 13 3.44772 13 4L13 11H20C20.5523 11 21 11.4477 21 12C21 12.5523 20.5523 13 20 13L13 13L13 20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20L11 13L4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11L11 11L11 4C11 3.44772 11.4477 3 12 3Z" fill="currentColor"></path></svg>
+                                            Upload your Data
+                                        </Button>
+
+
+                                        {open && (
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: -50,
+                                                    left: 0,
+                                                    zIndex: 1300,
+                                                    backgroundColor: '#fff',
+                                                    border: '1px solid #ccc',
+                                                    borderRadius: '8px',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                                    minWidth: '180px'
+                                                }}
+                                            >
+                                                <Menu
+                                                    anchorEl={anchorEl}
+                                                    open={open}
+                                                    onClose={handleClose}
+                                                >
+                                                    <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
+                                                </Menu>
+                                            </Box>
+                                        )}
+                                    </Box>
+
+
+
                                 </Box>
                                     <IconButton onClick={handleSubmit} sx={{ backgroundColor: "#5d5d5d", borderRadius: "50%" }}>
                                         <FaArrowUp color="#fff" />
