@@ -97,10 +97,10 @@ const Sidebar = ({ collapsed, toggleSidebar, onNewChat, onPromptSelect }) => {
                     }}
                 >
                     {/* <FaComments size={16} color="#000000" /> */}
-                    <img 
-        src={logo} // Update this with the correct image path
-        style={{ width: '16px', height: '16px' }} 
-    />
+                    <img
+                        src={logo} // Update this with the correct image path
+                        style={{ width: '24px', height: '24px' }}
+                    />
                 </Box>
                 <Typography
                     variant="body2"
@@ -109,6 +109,7 @@ const Sidebar = ({ collapsed, toggleSidebar, onNewChat, onPromptSelect }) => {
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
+                        fontSize: '1.1rem'
                     }}
                 >
                     Data Flywheel
