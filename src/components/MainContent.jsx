@@ -1186,7 +1186,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 flexDirection: 'column',
                 alignItems: 'center',
                 width: '100%',
-                position: messages.length === 0 ? 'static' : 'fixed',
                 marginTop: messages.length === 0 ? '36%' : '40px',  // Add spacing above input field
             }}>
 
