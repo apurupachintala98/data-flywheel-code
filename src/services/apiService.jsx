@@ -35,7 +35,7 @@ const ApiService = {
 
     getCortexSearchDetails: async () => {
         try {
-            const response = await axiosInstance.get('/api/cortex/search_details/');
+            const response = await axiosInstance.get('api/cortex/search_details/?aplctn_cd=aedldocai&app_id=docai&api_key=78a799ea-a0f6-11ef-a0ce-15a449f7a8b0&session_id=02c8491b-e128-4a0e-8caa-21c00124cddb&database_nm=DOC_AI_DB&schema_nm=HEDIS_SCHEMA');
             return response.data;
         } catch (error) {
             console.error("Error fetching cortex search details:", error);
@@ -45,7 +45,7 @@ const ApiService = {
 
     getCortexAnalystDetails: async () => {
         try {
-            const response = await axiosInstance.get('/api/cortex/analyst_details/');
+            const response = await axiosInstance.get('/api/cortex/analyst_details/?aplctn_cd=aedldocai&app_id=docai&api_key=78a799ea-a0f6-11ef-a0ce-15a449f7a8b0&session_id=da69b1c3-e3f5-4901-9450-231a732fb996&database_nm=DOC_AI_DB&schema_nm=HEDIS_SCHEMA');
             return response.data;
         } catch (error) {
             console.error('Error fetching cortex analyst details:', error);
