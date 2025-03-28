@@ -649,8 +649,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     display: 'none',              // Chrome, Safari
   },
             maxWidth: '45%', // Set max width as needed
-            // margin: '3% auto 0', // Center it horizontally
-            margin: '0 auto',
+            margin: '3% auto 0', // Center it horizontally
         }}>
 
             {messages.length === 0 && (
@@ -696,10 +695,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 </Box>
 
             ))}
-    <div id="scroll-anchor" style={{ height: 1 }} />
-
-           
-        </Box>
+        <div id="scroll-anchor" style={{ height: 1 }} />
 
         <Box sx={{
                 display: 'flex',
@@ -710,7 +706,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 zIndex: 1200,
             }}>
                 
-
                 <Box
                     sx={{
                         display: 'flex',
@@ -917,6 +912,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     )}
                 </Box>
             </Box>
+    </Box>
+
     </Box>
     );
 };
