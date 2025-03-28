@@ -367,7 +367,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             }
         };
         const response = await ApiService.runExeSql(payload);
-          const data = await response.json();
+          const data = await response;
             console.log(data);
           const convertToString = (input) => {
             if (typeof input === 'string') {
