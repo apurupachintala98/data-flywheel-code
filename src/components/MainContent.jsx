@@ -1152,11 +1152,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             margin: '3% auto 0', // Center it horizontally
         }}>
 
-            {messages.length === 0 && (
-                <Typography variant="h5" sx={{ marginBottom: '20px', fontWeight: "600", fontSize: "28px" }}>
-                    Data at your Fingertips
-                </Typography>
-            )}
+           
 
             {messages.map((message, index) => (
                 <Box sx={{
@@ -1208,7 +1204,11 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 marginTop: messages.length === 0 ? '36%' : '40px',  // Add spacing above input field
                 zIndex: 1200,
             }}>
-                
+                 {messages.length === 0 && (
+                <Typography variant="h5" sx={{ marginBottom: '20px', fontWeight: "600", fontSize: "28px" }}>
+                    Data at your Fingertips
+                </Typography>
+            )}
 
                 <Box
                     sx={{
