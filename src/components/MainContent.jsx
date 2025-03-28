@@ -347,7 +347,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     // };
 
     const executeSQL = async (sqlQuery) => {
-        const payload = {
+        try {
+              const payload = {
             "query": {
                 "aplctn_cd": "aedldocai",
                 "app_id": "docai",
@@ -365,85 +366,101 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 "exec_sql": sqlQuery.text
             }
         };
-    
-        try {
-            const response = await ApiService.runExeSql(payload);
-            const data = response?.data;
-    
-            const convertToString = (input) => {
-                if (typeof input === 'string') return input;
-                if (Array.isArray(input)) return input.map(convertToString).join(', ');
-                if (typeof input === 'object' && input !== null)
-                    return Object.entries(input)
-                        .map(([key, value]) => `${key}: ${convertToString(value)}`)
-                        .join(', ');
-                return String(input);
-            };
-    
-            let htmlContent = 'No valid reply found.';
-            let executedResponse = data;
-    
-            const isTable = Array.isArray(data) && data.length > 0 && typeof data[0] === 'object';
-    
-            if (isTable) {
-                const columns = Object.keys(data[0]);
-    
-                htmlContent = `
-                    <div style="display: flex; flex-direction: column; align-items: start;">
-                        <table style="border-collapse: collapse; width: 100%; margin-bottom: 12px;">
-                            <thead>
-                                <tr>
-                                    ${columns
-                                        .map(col => `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col}</th>`)
-                                        .join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.map((row, rowIndex) =>
-                                    `<tr>${columns
-                                        .map(col =>
-                                            `<td style="border: 1px solid black; padding: 8px;">${convertToString(row[col])}</td>`
-                                        ).join('')}</tr>`
-                                ).join('')}
-                            </tbody>
-                        </table>
-                        ${data.length > 1 && columns.length > 1
-                            ? `<button onclick="window.dispatchEvent(new CustomEvent('open-graph', { detail: ${JSON.stringify(data)} }))"
-                                style="margin-top: 10px; padding: 10px 15px; font-weight: bold; background-color: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                📊 Graph View
-                            </button>`
-                            : ''
-                        }
-                    </div>
-                `;
-            } else if (typeof data === 'string') {
-                htmlContent = data;
-            } else {
-                htmlContent = convertToString(data);
+        const response = await ApiService.runExeSql(payload);
+          const data = await response.json();
+            console.log(data);
+          const convertToString = (input) => {
+            if (typeof input === 'string') {
+              return input;
+            } else if (Array.isArray(input)) {
+              return input.map(convertToString).join(', ');
+            } else if (typeof input === 'object' && input !== null) {
+              return Object.entries(input)
+                .map(([key, value]) => `${key}: ${convertToString(value)}`)
+                .join(', ');
             }
-    
-            const executedMessage = {
-                text: htmlContent,
-                fromUser: false,
-                executedResponse,
-                type: isTable ? "table" : "result",
-                showExecute: false,
-                showSummarize: true,
-                showGraphButton: isTable && data.length > 1 && Object.keys(data[0]).length > 1,
-                prompt: sqlQuery.prompt,
-            };
-    
-            setMessages((prevMessages) => [...prevMessages, executedMessage]);
-    
-        } catch (error) {
-            console.error("Error executing SQL:", error);
-            const errorMessage = { text: "❌ Error executing SQL query.", fromUser: false };
-            setMessages((prevMessages) => [...prevMessages, errorMessage]);
+            return String(input);
+          };
+        
+          if (data && Array.isArray(data.response) && data.response.length > 0) {
+               const columns = Object.keys(data.response[0]);
+            const rows = data.response;
+            modelReply = (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                  <thead>
+                    <tr>
+                      {columns.map(column => (
+                        <th key={column} style={{ border: '1px solid black', padding: '8px', textAlign: 'left' }}>{column}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {columns.map(column => (
+                          <td key={`${rowIndex}-${column}`} style={{ border: '1px solid black', padding: '8px' }}>
+                            {convertToString(row[column])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {(rows.length > 1 && columns.length > 1) && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<BarChartIcon />}
+                    sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
+                    // onClick={() => handleGraphClick()}
+                  >
+                    Graph View
+                  </Button>
+                )}
+              </div>
+            );
+          } else if (typeof data === 'string') {
+            modelReply = data.response;
+            setIsLoading(true);
+          } else {
+            modelReply = convertToString(data.response);
+          }
+          const botMessage = {
+            text: modelReply,
+            fromUser: false,
+            executedResponse: data.response,
+            type: isTable ? "table" : "result",
+            showExecute: false,
+            showSummarize: true,
+            prompt: sqlQuery.prompt,
+          };
+      
+          setMessages((prevChatLog) => [...prevChatLog, botMessage]);
+          // await apiCortexComplete(data, promptQuestion, setChatLog);
+        
+        } catch (err) {
+          // Handle network errors or other unexpected issues
+          const fallbackErrorMessage = 'Error communicating with backend.';
+          const errorMessageContent = {
+            role: 'assistant',
+            content: (
+              <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+                <p style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>{fallbackErrorMessage}</p>
+              </div>
+            ),
+            fromUser: false,
+            showExecute: false,
+            showSummarize: false,
+          };
+          setMessages((prevChatLog) => [...prevChatLog, errorMessageContent]); // Update chat log with assistant's error message
+          console.error('Error:', err); // Log the error for debugging
+        } finally {
+          setIsLoading(false);
+         
         }
-    };
+      }
     
-    
-
     const apiCortex = async (message) => {
         const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
 

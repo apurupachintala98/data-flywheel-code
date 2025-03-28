@@ -120,25 +120,11 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
 
     const isSQL = message.type === "sql";
 
-    // const hasTable = Array.isArray(message.executedResponse)
-    // && message.executedResponse.length > 0
-    // && typeof message.executedResponse[0] === 'object'
-    // && message.type === "table";
-
     const shouldShowFeedback =
         message.type === "text" &&
         !message.fromUser &&
         (message.summarized || message.streaming);
 
-    // const convertToString = (input) => {
-    //     if (typeof input === 'string') return input;
-    //     if (Array.isArray(input)) return input.map(convertToString).join(', ');
-    //     if (typeof input === 'object' && input !== null)
-    //         return Object.entries(input)
-    //             .map(([k, v]) => `${k}: ${convertToString(v)}`)
-    //             .join(', ');
-    //     return String(input);
-    // };
 
     return (
         <div className="mb-4">
