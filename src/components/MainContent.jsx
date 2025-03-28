@@ -339,6 +339,37 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         }
     };
 
+    const handleUploadFromComputer = () => {
+        handleClose();
+        fileInputRef.current?.click();
+      };
+    
+      const handleFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+    
+        const formData = new FormData();
+        formData.append('file', file);
+    
+        try {
+          await axios.post('http://10.126.192.122:8888/upload_csv/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+    
+          toast.success("File uploaded successfully!", {
+            position: "top-right"
+          });
+    
+        } catch (error) {
+          toast.error("Upload failed. Please try again.", {
+            position: "top-right"
+          });
+          console.error("Upload error:", error);
+        }
+      };
+    
 
     return (
         <Box
@@ -784,30 +815,25 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                         anchorEl={anchorEl}
                                         open={open}
                                         onClose={handleClose}
-                                        MenuListProps={{
-                                            'aria-labelledby': 'upload-button',
-                                        }}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'left',
+                                          }}
+                                          transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                          }}
                                     >
-                                        <MenuItem onClick={handleClose}>Connect to Google Drive</MenuItem>
-                                        <MenuItem onClick={handleClose}>Connect to Microsoft OneDrive</MenuItem>
-                                        <MenuItem onClick={() => {
-                                            handleClose();
-                                            document.getElementById('fileInput')?.click();
-                                        }}>Upload from computer</MenuItem>
+                                        <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
                                     </Menu>
 
                                     <input
                                         id="fileInput"
                                         type="file"
                                         hidden
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                // Handle the file upload here
-                                                console.log("Uploading file:", file.name);
-                                            }
-                                        }}
+                                        onChange={handleFileChange}
                                     />
+                                    <ToastContainer />
                                 </Box>
                                     <IconButton onClick={handleSubmit} sx={{ backgroundColor: "#5d5d5d", borderRadius: "50%" }}>
                                         <FaArrowUp color="#fff" />
