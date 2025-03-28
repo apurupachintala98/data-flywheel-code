@@ -62,7 +62,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     useEffect(() => {
         const fetchYamlFiles = async () => {
             try {
-                const response = await ApiService.fetchCortexAnalystDetails(); // 
+                const response = await ApiService.getCortexAnalystDetails(); // 
                 if (response && Array.isArray(response)) {
                     setYamlFiles(response); // Ensure it's an array
                 } else {
@@ -80,7 +80,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     useEffect(() => {
         const fetchSearchFiles = async () => {
             try {
-                const response = await ApiService.fetchCortexSearchDetails();
+                const response = await ApiService.getCortexSearchDetails();
                 setSearchFiles(response || []);
             } catch (error) {
                 console.error("Error fetching Search files:", error);
