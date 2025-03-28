@@ -256,6 +256,96 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     //     }
     // };
 
+    // const executeSQL = async (sqlQuery) => {
+    //     const payload = {
+    //         "query": {
+    //             "aplctn_cd": "aedldocai",
+    //             "app_id": "docai",
+    //             "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+    //             "prompt": {
+    //                 "messages": [
+    //                     {
+    //                         "role": "user",
+    //                         "content": sqlQuery.prompt || sqlQuery.text
+    //                     }
+    //                 ]
+    //             },
+    //             "app_lvl_prefix": "",
+    //             "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
+    //             "exec_sql": sqlQuery.text
+    //         }
+    //     };
+    
+    //     try {
+    //         const response = await ApiService.runExeSql(payload);
+    //         const resultData = response?.data;
+    //         const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
+    
+    //         const convertToString = (input) => {
+    //             if (typeof input === 'string') return input;
+    //             if (Array.isArray(input)) return input.map(convertToString).join(', ');
+    //             if (typeof input === 'object' && input !== null)
+    //                 return Object.entries(input)
+    //                     .map(([key, value]) => `${key}: ${convertToString(value)}`)
+    //                     .join(', ');
+    //             return String(input);
+    //         };
+    
+    //         let htmlTable = '';
+    //         if (isTable) {
+    //             const columns = Object.keys(resultData[0]);
+    
+    //             htmlTable = `
+    //                 <div style="overflow-x:auto;">
+    //                     <table style="border-collapse: collapse; width: 100%;">
+    //                         <thead>
+    //                             <tr>
+    //                                 ${columns
+    //                                     .map(
+    //                                         (col) =>
+    //                                             `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col}</th>`
+    //                                     )
+    //                                     .join('')}
+    //                             </tr>
+    //                         </thead>
+    //                         <tbody>
+    //                             ${resultData
+    //                                 .map(
+    //                                     (row) =>
+    //                                         `<tr>${columns
+    //                                             .map(
+    //                                                 (col) =>
+    //                                                     `<td style="border: 1px solid black; padding: 8px;">${convertToString(
+    //                                                         row[col]
+    //                                                     )}</td>`
+    //                                             )
+    //                                             .join('')}</tr>`
+    //                                 )
+    //                                 .join('')}
+    //                         </tbody>
+    //                     </table>
+    //                 </div>`;
+    //         }
+    
+    //         const executedMessage = {
+    //             text: isTable ? htmlTable : JSON.stringify(response, null, 2),
+    //             fromUser: false,
+    //             executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+    //             type: isTable ? "table" : "result",
+    //             showExecute: false,
+    //             showSummarize: true,
+    //             prompt: sqlQuery.prompt,
+    //         };
+    
+    //         setMessages((prevMessages) => [...prevMessages, executedMessage]);
+    
+    //     } catch (error) {
+    //         console.error("Error executing SQL:", error);
+    //         const errorMessage = { text: "Error executing SQL query.", fromUser: false };
+    //         setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    //     }
+    // };
+
     const executeSQL = async (sqlQuery) => {
         const payload = {
             "query": {
@@ -278,8 +368,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
         try {
             const response = await ApiService.runExeSql(payload);
-            const resultData = response?.data;
-            const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
+            const data = response?.data;
     
             const convertToString = (input) => {
                 if (typeof input === 'string') return input;
@@ -291,49 +380,56 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 return String(input);
             };
     
-            let htmlTable = '';
-            if (isTable) {
-                const columns = Object.keys(resultData[0]);
+            let htmlContent = 'No valid reply found.';
+            let executedResponse = data;
     
-                htmlTable = `
-                    <div style="overflow-x:auto;">
-                        <table style="border-collapse: collapse; width: 100%;">
+            const isTable = Array.isArray(data) && data.length > 0 && typeof data[0] === 'object';
+    
+            if (isTable) {
+                const columns = Object.keys(data[0]);
+    
+                htmlContent = `
+                    <div style="display: flex; flex-direction: column; align-items: start;">
+                        <table style="border-collapse: collapse; width: 100%; margin-bottom: 12px;">
                             <thead>
                                 <tr>
                                     ${columns
-                                        .map(
-                                            (col) =>
-                                                `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col}</th>`
-                                        )
+                                        .map(col => `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col}</th>`)
                                         .join('')}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${resultData
-                                    .map(
-                                        (row) =>
-                                            `<tr>${columns
-                                                .map(
-                                                    (col) =>
-                                                        `<td style="border: 1px solid black; padding: 8px;">${convertToString(
-                                                            row[col]
-                                                        )}</td>`
-                                                )
-                                                .join('')}</tr>`
-                                    )
-                                    .join('')}
+                                ${data.map((row, rowIndex) =>
+                                    `<tr>${columns
+                                        .map(col =>
+                                            `<td style="border: 1px solid black; padding: 8px;">${convertToString(row[col])}</td>`
+                                        ).join('')}</tr>`
+                                ).join('')}
                             </tbody>
                         </table>
-                    </div>`;
+                        ${data.length > 1 && columns.length > 1
+                            ? `<button onclick="window.dispatchEvent(new CustomEvent('open-graph', { detail: ${JSON.stringify(data)} }))"
+                                style="margin-top: 10px; padding: 10px 15px; font-weight: bold; background-color: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                📊 Graph View
+                            </button>`
+                            : ''
+                        }
+                    </div>
+                `;
+            } else if (typeof data === 'string') {
+                htmlContent = data;
+            } else {
+                htmlContent = convertToString(data);
             }
     
             const executedMessage = {
-                text: isTable ? htmlTable : JSON.stringify(response, null, 2),
+                text: htmlContent,
                 fromUser: false,
-                executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+                executedResponse,
                 type: isTable ? "table" : "result",
                 showExecute: false,
                 showSummarize: true,
+                showGraphButton: isTable && data.length > 1 && Object.keys(data[0]).length > 1,
                 prompt: sqlQuery.prompt,
             };
     
@@ -341,10 +437,11 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     
         } catch (error) {
             console.error("Error executing SQL:", error);
-            const errorMessage = { text: "Error executing SQL query.", fromUser: false };
+            const errorMessage = { text: "❌ Error executing SQL query.", fromUser: false };
             setMessages((prevMessages) => [...prevMessages, errorMessage]);
         }
     };
+    
     
 
     const apiCortex = async (message) => {
