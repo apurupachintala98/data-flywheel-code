@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, IconButton, Typography, TextField, Menu, MenuItem, Divider, ListItemIcon, Button } from '@mui/material';
 import { FaArrowUp, FaAngleDown, FaUserCircle } from 'react-icons/fa'; // Icons
 import SettingsIcon from '@mui/icons-material/Settings';
