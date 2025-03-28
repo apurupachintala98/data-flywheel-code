@@ -904,7 +904,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             height: '100vh', // Ensure the content takes full height
             position: 'relative', // Ensure dropdowns stay inside this box
             transition: 'all 0.5s ease-in-out',
-            overflow: 'hidden',
+            // overflow: 'hidden',
+            overflowY: 'auto',
         }}
     >
         <Box sx={{
@@ -1131,7 +1132,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         <Box sx={{
             textAlign: 'center',
             marginTop: '50px',
-            overflowY: 'auto',
             width: '100%',
             maxWidth: '45%', // Set max width as needed
             margin: '3% auto 0', // Center it horizontally
