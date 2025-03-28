@@ -126,27 +126,30 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const handleSubmit = async () => {
 
         if (selectedFile) {
-            // Upload file flow
+            setIsUploading(true);
+        
             const formData = new FormData();
-            formData.append("file", selectedFile);
+            formData.append('file', selectedFile);
         
             try {
-              await axios.post("http://10.126.192.122:8888/upload_csv/", formData, {
+              await axios.post('http://10.126.192.122:8888/upload_csv/', formData, {
                 headers: {
-                  "Content-Type": "multipart/form-data"
-                }
+                  'Content-Type': 'multipart/form-data',
+                },
               });
         
-              toast.success("File uploaded successfully!", { position: "top-right" });
+              toast.success('File uploaded successfully!', { position: 'top-right' });
               setSelectedFile(null);
             } catch (error) {
-              toast.error("Upload failed. Please try again.", { position: "top-right" });
-              console.error("Upload error:", error);
+              toast.error('Upload failed. Please try again.', { position: 'top-right' });
+              console.error('Upload error:', error);
+            } finally {
+              setIsUploading(false);
             }
         
-            return; // Stop here if file was uploaded
+            return;
           }
-          
+
         if (!inputValue.trim()) return; // Prevent empty submissions
 
         const userMessage = { text: inputValue, fromUser: true };
@@ -745,6 +748,50 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     marginTop: '12px'
                                 }}
                             >
+                                {selectedFile && (
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+        <Box
+          sx={{
+            position: 'relative',
+            height: 56,
+            width: 56,
+            borderRadius: '12px',
+            border: '1px solid #e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f9f9f9'
+          }}
+        >
+          {isUploading ? (
+            <CircularProgress size={28} />
+          ) : (
+            <InsertDriveFileIcon sx={{ color: '#9e9e9e', fontSize: 24 }} />
+          )}
+          <IconButton
+            size="small"
+            onClick={() => setSelectedFile(null)}
+            sx={{
+              position: 'absolute',
+              top: '-6px',
+              right: '-6px',
+              backgroundColor: '#000',
+              color: '#fff',
+              '&:hover': {
+                backgroundColor: '#333',
+              },
+              width: 18,
+              height: 18,
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 12 }} />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" sx={{ maxWidth: 160, wordBreak: 'break-word' }}>
+          {selectedFile.name}
+        </Typography>
+      </Box>
+    )}
                                 <><Box sx={{ display: 'flex', gap: '8px' }}>
                                     <Button
                                         variant="outlined"
@@ -784,24 +831,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                         Search Service
                                     </Button>
 
-                                    {/* <Button
-                                        variant="outlined"
-                                        component="a"
-                                        href="https://app-carelon-eda_preprod.privatelink.snowflakecomputing.com/carelon/eda_preprod/#/data/databases/DOC_AI_DB/schemas/DOC_AI_SCHEMA/stage/COC_STAGE"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        sx={{
-                                            borderRadius: "50px",
-                                            textTransform: "none",
-                                            fontSize: "14px",
-                                            padding: "6px 12px",
-                                            color: "#5d5d5d",
-                                            borderColor: "#5d5d5d",
-                                            fontSize: '13.3px'
-                                        }}
-                                    >
-                                        Upload your Data
-                                    </Button> */}
+                                   
                                     <Button
                                         variant="outlined"
                                         onClick={handleUploadMenuClick}
@@ -833,22 +863,20 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                             horizontal: 'left',
                                         }}
                                     >
-                                        <MenuItem onClick={() => { handleClose(); window.location.href = "https://drive.google.com"; }}>
-                                            Connect to Google Drive
-                                        </MenuItem>
                                         <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
                                     </Menu>
 
                                     <input
   type="file"
   ref={fileInputRef}
-  hidden
+  style={{ display: 'none' }}
   onChange={(e) => {
     const file = e.target.files?.[0];
-    if (file) setSelectedFile(file);
+    if (file) {
+      setSelectedFile(file);
+    }
   }}
 />
-
                                     {selectedFile && (
                                         <Box sx={{
                                             border: '1px dashed #aaa',
