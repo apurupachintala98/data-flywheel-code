@@ -381,7 +381,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             }
             return String(input);
           };
-        
+        let modelReply = "";
           if (data && Array.isArray(data.response) && data.response.length > 0) {
                const columns = Object.keys(data.response[0]);
             const rows = data.response;
@@ -411,7 +411,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                   <Button
                     variant="contained"
                     color="primary"
-                    startIcon={<BarChartIcon />}
+                    // startIcon={<BarChartIcon />}
                     sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
                     // onClick={() => handleGraphClick()}
                   >
@@ -422,7 +422,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             );
           } else if (typeof data === 'string') {
             modelReply = data.response;
-            setIsLoading(true);
+            // setIsLoading(true);
           } else {
             modelReply = convertToString(data.response);
           }
@@ -430,7 +430,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             text: modelReply,
             fromUser: false,
             executedResponse: data.response,
-            type: isTable ? "table" : "result",
+            // type: isTable ? "table" : "result",
             showExecute: false,
             showSummarize: true,
             prompt: sqlQuery.prompt,
@@ -455,10 +455,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
           };
           setMessages((prevChatLog) => [...prevChatLog, errorMessageContent]); // Update chat log with assistant's error message
           console.error('Error:', err); // Log the error for debugging
-        } finally {
-          setIsLoading(false);
-         
-        }
+        } 
       }
     
     const apiCortex = async (message) => {
