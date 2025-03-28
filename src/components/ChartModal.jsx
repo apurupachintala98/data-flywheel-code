@@ -5,7 +5,7 @@ import exporting from 'highcharts/modules/exporting';
 import exportData from 'highcharts/modules/export-data'; // Optional for CSV export
 import offlineExporting from 'highcharts/modules/offline-exporting'; // Import offline exporting module
 import variablePie from 'highcharts/modules/variable-pie'; // Import the variable-pie module
-import highchartsMore from 'highcharts/highcharts-more';
+import more from 'highcharts/highcharts-more';
 import {
   Modal,
   Button,
@@ -22,7 +22,7 @@ exporting(Highcharts);
 exportData(Highcharts); // Optional, for CSV export
 offlineExporting(Highcharts); // Initialize offline exporting
 variablePie(Highcharts); // Initialize variable-pie module
-highchartsMore(Highcharts);
+more(Highcharts);
 
 const ChartModal = ({ visible, onClose, chartData = [] }) => {
   const [chartType, setChartType] = useState('line');

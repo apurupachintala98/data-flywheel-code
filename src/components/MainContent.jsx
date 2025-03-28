@@ -300,9 +300,9 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     </div>
                 );
             } else if (typeof data === 'string') {
-                modelReply = data.response;
+                modelReply = data;
             } else {
-                modelReply = convertToString(data.response);
+                modelReply = convertToString(data);
             }
             const botMessage = {
                 text: modelReply,
