@@ -901,14 +901,13 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             transition: 'margin-left 0.3s ease',
             justifyContent: submitted ? 'flex-start' : 'center',
             alignItems: 'center', // Center horizontally
-             // Ensure the content takes full height
+            height: '100vh', // Ensure the content takes full height
             position: 'relative', // Ensure dropdowns stay inside this box
             transition: 'all 0.5s ease-in-out',
             // overflow: 'hidden',
-           
+            overflowY: 'auto',
         }}
     >
-        <Box sx={{ overflowY: 'auto',height: '100vh',}}>
         <Box sx={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0px 30px',
             position: 'absolute', top: '0px', left: '0', right: '0',
@@ -1129,7 +1128,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 </Menu>
             </Box>
         </Box>
-        </Box>
+
         <Box sx={{
             textAlign: 'center',
             marginTop: '50px',
