@@ -13,9 +13,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import MessageWithFeedback from './Feedback';
 import ApiService from '../services/apiService';
 import HashLoader from 'react-spinners/HashLoader';
+import ChartModal from './ChartModal';
 import logo from '../assets/Logo.jpg';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import 'react-toastify/dist/ReactToastify.css';
 
 const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) => {
@@ -23,6 +25,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [submitted, setSubmitted] = useState(false);
     const [messages, setMessages] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [data, setData] = useState('');
     const [chatAnchorEl, setChatAnchorEl] = useState(null);
     const [searchAnchorEl, setSearchAnchorEl] = useState(null);
     const [selectedYamlModels, setSelectedYamlModels] = useState([]); // Store selected files
@@ -37,6 +40,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
 
     const handleUploadMenuClick = (event) => {
         uploadSetAnchorEl(event.currentTarget);
@@ -46,6 +51,13 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         uploadSetAnchorEl(null);
     };
 
+    const handleGraphClick = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleModalClose = () => {
+        setIsModalVisible(false);
+    };
 
     useEffect(() => {
         const fetchYamlFiles = async () => {
@@ -236,7 +248,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
             const response = await ApiService.runExeSql(payload);
             const data = await response;
-            console.log(data);
+            setData(data);
             const convertToString = (input) => {
                 if (typeof input === 'string') {
                     return input;
@@ -278,10 +290,9 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                         {(rows.length > 1 && columns.length > 1) && (
                             <Button
                                 variant="contained"
-                                color="primary"
-                                // startIcon={<BarChartIcon />}
-                                sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
-                            // onClick={() => handleGraphClick()}
+                                startIcon={<BarChartIcon />}
+                                sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold', color: '#fff', backgroundColor: '#000' }}
+                                onClick={handleGraphClick}
                             >
                                 Graph View
                             </Button>
@@ -776,8 +787,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     ))}
 
                     {isLoading && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                            <HashLoader color="#000000" size={30} aria-label="Loading Spinner" data-testid="loader" />
+                        <Box sx={{ display: 'flex', justifyContent: 'start', marginTop: '20px' }}>
+                            <HashLoader color="#000000" size={20} aria-label="Loading Spinner" data-testid="loader" />
                         </Box>
                     )}
                     <div id="scroll-anchor" style={{ height: 1 }} />
@@ -1003,6 +1014,12 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                         )}
                     </Box>
                 </Box>
+
+                <ChartModal
+                    visible={isModalVisible}
+                    onClose={handleModalClose}
+                    chartData={data || []}  // Ensure you pass valid JSON data
+                />
             </Box></>
     );
 };
