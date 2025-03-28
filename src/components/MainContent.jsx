@@ -36,6 +36,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleUploadMenuClick = (event) => {
         uploadSetAnchorEl(event.currentTarget);
@@ -193,6 +194,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             }
         };
         try {
+            setIsLoading(true);
             const response = await ApiService.sendTextToSQL(payload);
             const modelResponse = response?.response || "No valid response received.";
             const responseType = response?.type || "text";
@@ -204,132 +206,137 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             console.error("Error fetching API response:", error);
             const errorMessage = { text: "An error occurred while fetching data.", fromUser: false };
             setMessages((prevMessages) => [...prevMessages, errorMessage]);
+        } finally {
+            setIsLoading(false);
         }
+
     };
 
     const executeSQL = async (sqlQuery) => {
         try {
-              const payload = {
-            "query": {
-                "aplctn_cd": "aedldocai",
-                "app_id": "docai",
-                "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-                "prompt": {
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": sqlQuery.prompt || sqlQuery.text
-                        }
-                    ]
-                },
-                "app_lvl_prefix": "",
-                "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
-                "exec_sql": sqlQuery.text
-            }
-        };
-        const response = await ApiService.runExeSql(payload);
-          const data = await response;
+            setIsLoading(true);
+            const payload = {
+                "query": {
+                    "aplctn_cd": "aedldocai",
+                    "app_id": "docai",
+                    "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+                    "prompt": {
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": sqlQuery.prompt || sqlQuery.text
+                            }
+                        ]
+                    },
+                    "app_lvl_prefix": "",
+                    "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
+                    "exec_sql": sqlQuery.text
+                }
+            };
+
+            const response = await ApiService.runExeSql(payload);
+            const data = await response;
             console.log(data);
-          const convertToString = (input) => {
-            if (typeof input === 'string') {
-              return input;
-            } else if (Array.isArray(input)) {
-              return input.map(convertToString).join(', ');
-            } else if (typeof input === 'object' && input !== null) {
-              return Object.entries(input)
-                .map(([key, value]) => `${key}: ${convertToString(value)}`)
-                .join(', ');
+            const convertToString = (input) => {
+                if (typeof input === 'string') {
+                    return input;
+                } else if (Array.isArray(input)) {
+                    return input.map(convertToString).join(', ');
+                } else if (typeof input === 'object' && input !== null) {
+                    return Object.entries(input)
+                        .map(([key, value]) => `${key}: ${convertToString(value)}`)
+                        .join(', ');
+                }
+                return String(input);
+            };
+            let modelReply = "";
+            if (data && Array.isArray(data) && data.length > 0) {
+                const columns = Object.keys(data[0]);
+                const rows = data;
+                modelReply = (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                            <thead>
+                                <tr>
+                                    {columns.map(column => (
+                                        <th key={column} style={{ border: '1px solid black', padding: '8px', textAlign: 'left' }}>{column}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rows.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        {columns.map(column => (
+                                            <td key={`${rowIndex}-${column}`} style={{ border: '1px solid black', padding: '8px' }}>
+                                                {convertToString(row[column])}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {(rows.length > 1 && columns.length > 1) && (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                // startIcon={<BarChartIcon />}
+                                sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
+                            // onClick={() => handleGraphClick()}
+                            >
+                                Graph View
+                            </Button>
+                        )}
+                    </div>
+                );
+            } else if (typeof data === 'string') {
+                modelReply = data.response;
+            } else {
+                modelReply = convertToString(data.response);
             }
-            return String(input);
-          };
-        let modelReply = "";
-          if (data && Array.isArray(data) && data.length > 0) {
-               const columns = Object.keys(data[0]);
-            const rows = data;
-            modelReply = (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-                <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                  <thead>
-                    <tr>
-                      {columns.map(column => (
-                        <th key={column} style={{ border: '1px solid black', padding: '8px', textAlign: 'left' }}>{column}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        {columns.map(column => (
-                          <td key={`${rowIndex}-${column}`} style={{ border: '1px solid black', padding: '8px' }}>
-                            {convertToString(row[column])}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {(rows.length > 1 && columns.length > 1) && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    // startIcon={<BarChartIcon />}
-                    sx={{ marginTop: '15px', fontSize: '0.875rem', fontWeight: 'bold' }}
-                    // onClick={() => handleGraphClick()}
-                  >
-                    Graph View
-                  </Button>
-                )}
-              </div>
-            );
-          } else if (typeof data === 'string') {
-            modelReply = data.response;
-          } else {
-            modelReply = convertToString(data.response);
-          }
-          const botMessage = {
-            text: modelReply,
-            fromUser: false,
-            executedResponse: data,
-            showExecute: false,
-            showSummarize: true,
-            prompt: sqlQuery.prompt,
-          };
-      
-          setMessages((prevChatLog) => [...prevChatLog, botMessage]);        
+            const botMessage = {
+                text: modelReply,
+                fromUser: false,
+                executedResponse: data,
+                showExecute: false,
+                showSummarize: true,
+                prompt: sqlQuery.prompt,
+            };
+
+            setMessages((prevChatLog) => [...prevChatLog, botMessage]);
         } catch (err) {
-          const fallbackErrorMessage = 'Error communicating with backend.';
-          const errorMessageContent = {
-            role: 'assistant',
-            text: (
-              <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <p style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>{fallbackErrorMessage}</p>
-              </div>
-            ),
-            fromUser: false,
-            showExecute: false,
-            showSummarize: false,
-          };
-          setMessages((prevChatLog) => [...prevChatLog, errorMessageContent]); // Update chat log with assistant's error message
-          console.error('Error:', err); // Log the error for debugging
+            const fallbackErrorMessage = 'Error communicating with backend.';
+            const errorMessageContent = {
+                role: 'assistant',
+                text: (
+                    <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+                        <p style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>{fallbackErrorMessage}</p>
+                    </div>
+                ),
+                fromUser: false,
+                showExecute: false,
+                showSummarize: false,
+            };
+            setMessages((prevChatLog) => [...prevChatLog, errorMessageContent]); // Update chat log with assistant's error message
+            console.error('Error:', err); // Log the error for debugging
         } finally {
-            // Hide the execute button on the original message
+            setIsLoading(false);
             setMessages((prevChatLog) =>
                 prevChatLog.map((msg) =>
-                msg.text === sqlQuery.text
-                  ? { ...msg, showExecute: false }
-                  : msg
-              )
+                    msg.text === sqlQuery.text
+                        ? { ...msg, showExecute: false }
+                        : msg
+                )
             );
-          }
-      }
-    
+        }
+    }
+
     const apiCortex = async (message) => {
         const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
 
         const payload = {
             query: {
-                aplctn_cd: "aedldocai",
-                app_id: "docai",
+                aplctn_cd: "aedl",
+                app_id: "aedl",
                 api_key: "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
                 method: "cortex",
                 model: "llama3.1-70b-elevance",
@@ -762,12 +769,17 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     </Box>
                                 ) : (
                                     <MessageWithFeedback message={message} executeSQL={executeSQL} apiCortex={apiCortex} />
-
                                 )}
                             </Box>
                         </Box>
 
                     ))}
+
+                    {isLoading && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                            <HashLoader color="#000000" size={30} aria-label="Loading Spinner" data-testid="loader" />
+                        </Box>
+                    )}
                     <div id="scroll-anchor" style={{ height: 1 }} />
 
 
@@ -904,7 +916,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                 }}
                             >
                                 <><Box sx={{ display: 'flex', gap: '8px' }}>
-                                <Box sx={{ position: 'relative' }}>
+                                    <Box sx={{ position: 'relative' }}>
                                         <Button
                                             variant="outlined"
                                             onClick={handleUploadMenuClick}
@@ -982,7 +994,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     </Button>
 
 
-                                  
+
                                 </Box>
                                     <IconButton onClick={handleSubmit} sx={{ backgroundColor: "#5d5d5d", borderRadius: "50%" }}>
                                         <FaArrowUp color="#fff" />
