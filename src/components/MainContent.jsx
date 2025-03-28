@@ -876,13 +876,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                                     minWidth: '180px'
                                                 }}
                                             >
-                                                <Menu
-                                                    anchorEl={anchorEl}
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                >
+                                               
                                                     <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
-                                                </Menu>
                                             </Box>
                                         )}
                                     </Box>
