@@ -120,25 +120,25 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
 
     const isSQL = message.type === "sql";
 
-    const hasTable = Array.isArray(message.executedResponse)
-    && message.executedResponse.length > 0
-    && typeof message.executedResponse[0] === 'object'
-    && message.type === "table";
+    // const hasTable = Array.isArray(message.executedResponse)
+    // && message.executedResponse.length > 0
+    // && typeof message.executedResponse[0] === 'object'
+    // && message.type === "table";
 
     const shouldShowFeedback =
         message.type === "text" &&
         !message.fromUser &&
         (message.summarized || message.streaming);
 
-    const convertToString = (input) => {
-        if (typeof input === 'string') return input;
-        if (Array.isArray(input)) return input.map(convertToString).join(', ');
-        if (typeof input === 'object' && input !== null)
-            return Object.entries(input)
-                .map(([k, v]) => `${k}: ${convertToString(v)}`)
-                .join(', ');
-        return String(input);
-    };
+    // const convertToString = (input) => {
+    //     if (typeof input === 'string') return input;
+    //     if (Array.isArray(input)) return input.map(convertToString).join(', ');
+    //     if (typeof input === 'object' && input !== null)
+    //         return Object.entries(input)
+    //             .map(([k, v]) => `${k}: ${convertToString(v)}`)
+    //             .join(', ');
+    //     return String(input);
+    // };
 
     return (
         <div className="mb-4">
@@ -158,77 +158,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     borderRadius: '8px'
                 }}
             >
-                {hasTable ? (
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'flex-start',
-                            backgroundColor: 'white',
-                            borderRadius: '12px',
-                            padding: '12px',
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                            overflowX: 'auto',
-                            maxWidth: '100%'
-                        }}
-                    >
-                        {/* Optional Bot Icon */}
-                        <div style={{ fontSize: '24px', marginRight: '12px' }}>🤖</div>
-
-                        <table
-                            style={{
-                                borderCollapse: 'collapse',
-                                fontSize: '14px',
-                                fontFamily: 'Arial, sans-serif',
-                                color: '#000',
-                                tableLayout: 'fixed',
-                                minWidth: '400px'
-                            }}
-                        >
-                            <thead>
-                                <tr>
-                                    {Object.keys(message.executedResponse[0]).map((column) => (
-                                        <th
-                                            key={column}
-                                            style={{
-                                                border: '1px solid #000',
-                                                padding: '8px',
-                                                textAlign: 'left',
-                                                fontWeight: 'bold',
-                                                color: '#001f5b',
-                                                backgroundColor: '#fff'
-                                            }}
-                                        >
-                                            {column}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {message.executedResponse.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                        {Object.keys(row).map((colKey) => (
-                                            <td
-                                                key={`${rowIndex}-${colKey}`}
-                                                style={{
-                                                    border: '1px solid #000',
-                                                    padding: '8px',
-                                                    textAlign:
-                                                        typeof row[colKey] === 'number'
-                                                            ? 'right'
-                                                            : 'left',
-                                                    backgroundColor: '#fff'
-                                                }}
-                                            >
-                                                {convertToString(row[colKey])}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : isSQL ? (
+                {isSQL ? (
                     <SyntaxHighlighter language="sql" style={dracula}>
                         {message.text}
                     </SyntaxHighlighter>
@@ -244,7 +174,7 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                     <Button
                         variant="contained"
                         color="#fff"
-                        sx={{ marginTop: '10px', backgroundColor: '#000' }}
+                        sx={{ marginTop: '10px', backgroundColor: '#000',color:'#fff' }}
                         onClick={() => executeSQL(message)}
                     >
                         Execute SQL
@@ -254,8 +184,8 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                 {message.showSummarize && (
                     <Button
                         variant="contained"
-                        color="#fff"
-                        sx={{ marginTop: '10px', backgroundColor: '#000' }}
+                        sx={{ marginTop: '10px', backgroundColor: '#000', color:'#fff'
+                        }}
                         onClick={() => apiCortex(message)}
                     >
                         Summarize
