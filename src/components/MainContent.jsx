@@ -431,7 +431,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
           const botMessage = {
             text: modelReply,
             fromUser: false,
-            executedResponse: modelReply,
+            executedResponse: data,
             // type: isTable ? "table" : "result",
             showExecute: false,
             showSummarize: true,
