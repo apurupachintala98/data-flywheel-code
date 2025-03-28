@@ -5,7 +5,7 @@ import HighchartsReact from 'highcharts-react-official';
 // import exportData from 'highcharts/modules/export-data'; // Optional for CSV export
 // import offlineExporting from 'highcharts/modules/offline-exporting'; // Import offline exporting module
 // import variablePie from 'highcharts/modules/variable-pie'; // Import the variable-pie module
-import more from 'highcharts/highcharts-more';
+// import more from 'highcharts/highcharts-more';
 import {
   Modal,
   Button,
@@ -22,7 +22,7 @@ import {
 // exportData(Highcharts); // Optional, for CSV export
 // offlineExporting(Highcharts); // Initialize offline exporting
 // variablePie(Highcharts); // Initialize variable-pie module
-more(Highcharts);
+// more(Highcharts);
 
 const ChartModal = ({ visible, onClose, chartData = [] }) => {
   const [chartType, setChartType] = useState('line');
@@ -64,21 +64,21 @@ const ChartModal = ({ visible, onClose, chartData = [] }) => {
       //     }]
       //   };
 
-      case 'bubble':
-        return {
-          chart: { type: 'bubble', plotBorderWidth: 1, zoomType: 'xy' },
-          title: { text: titleText },
-          credits: { enabled: false },
-          xAxis: { title: { text: xAxisKey } },
-          yAxis: { title: { text: yAxisKey } },
-          series: [{
-            data: limitedData.map(item => [
-              item[xAxisKey],
-              item[yAxisKey],
-              Math.sqrt(item[yAxisKey]) // Assuming yAxisKey value defines bubble size
-            ])
-          }]
-        };
+      // case 'bubble':
+      //   return {
+      //     chart: { type: 'bubble', plotBorderWidth: 1, zoomType: 'xy' },
+      //     title: { text: titleText },
+      //     credits: { enabled: false },
+      //     xAxis: { title: { text: xAxisKey } },
+      //     yAxis: { title: { text: yAxisKey } },
+      //     series: [{
+      //       data: limitedData.map(item => [
+      //         item[xAxisKey],
+      //         item[yAxisKey],
+      //         Math.sqrt(item[yAxisKey]) // Assuming yAxisKey value defines bubble size
+      //       ])
+      //     }]
+      //   };
 
       case 'line':
       case 'area':
@@ -143,7 +143,7 @@ const ChartModal = ({ visible, onClose, chartData = [] }) => {
             label="Chart Type"
           >
             {/* <MenuItem value="pie">Variable Radius Pie</MenuItem> */}
-            <MenuItem value="bubble">Bubble Chart</MenuItem>
+            {/* <MenuItem value="bubble">Bubble Chart</MenuItem> */}
             <MenuItem value="line">Line Chart</MenuItem>
             <MenuItem value="area">Area Chart</MenuItem>
             <MenuItem value="bar">Basic Bar Chart</MenuItem>
