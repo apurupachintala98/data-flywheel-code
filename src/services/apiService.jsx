@@ -12,25 +12,25 @@ const axiosInstance = axios.create({
 
 const ApiService = {
 
-    fetchCortexAnalystDetails: async () => {
-        try {
-            const response = await axios.get("http://10.126.192.122:8100/api/cortex/get_cortex_analyst_details/");
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching Cortex Analyst details:", error);
-            throw error;
-        }
-    },
+    // fetchCortexAnalystDetails: async () => {
+    //     try {
+    //         const response = await axios.get("http://10.126.192.122:8100/api/cortex/get_cortex_analyst_details/");
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error fetching Cortex Analyst details:", error);
+    //         throw error;
+    //     }
+    // },
 
-    fetchCortexSearchDetails: async () => {
-        try {
-            const response = await axios.get("http://10.126.192.122:8100/api/cortex/get_cortex_search_details/");
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching Cortex Search details:", error);
-            throw error;
-        }
-    },
+    // fetchCortexSearchDetails: async () => {
+    //     try {
+    //         const response = await axios.get("http://10.126.192.122:8100/api/cortex/get_cortex_search_details/");
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error fetching Cortex Search details:", error);
+    //         throw error;
+    //     }
+    // },
 
 
     getCortexSearchDetails: async () => {
