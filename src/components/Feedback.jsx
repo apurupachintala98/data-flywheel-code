@@ -120,10 +120,10 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
 
     const isSQL = message.type === "sql";
 
-    const hasTable =
-        Array.isArray(message.executedResponse) &&
-        message.executedResponse.length > 0 &&
-        typeof message.executedResponse[0] === 'object';
+    const hasTable = Array.isArray(message.executedResponse)
+    && message.executedResponse.length > 0
+    && typeof message.executedResponse[0] === 'object'
+    && message.type === "table";
 
     const shouldShowFeedback =
         message.type === "text" &&
