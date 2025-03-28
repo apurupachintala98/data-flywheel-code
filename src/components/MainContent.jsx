@@ -24,7 +24,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [isSearchHovered, setIsSearchHovered] = useState(false);
     const [yamlFiles, setYamlFiles] = useState([]); // State to store API data
     const [searchFiles, setSearchFiles] = useState([]); // State to store API data
-    const [uploadAnchorEl, uploadSetAnchorEl] = useState < null | HTMLElement > (null);
+    const [uploadAnchorEl, uploadSetAnchorEl] = useState(null);
     const open = Boolean(uploadAnchorEl);
 
     const handleUploadMenuClick = (event) => {
