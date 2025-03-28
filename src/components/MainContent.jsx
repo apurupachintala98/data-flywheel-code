@@ -150,7 +150,8 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     },
                 });
 
-                toast.success('File uploaded successfully!', { position: 'top-right' });
+                const successMessage = response?.data?.message || 'File uploaded successfully!';
+toast.success(successMessage, { position: 'top-right' });
                 setSelectedFile(null);
             } catch (error) {
                 toast.error('Upload failed. Please try again.', { position: 'top-right' });
@@ -705,7 +706,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 zIndex: 1200,
             }}>
                 {messages.length === 0 && (
-                <Typography variant="h5" sx={{ marginBottom: '20px', fontWeight: "600", fontSize: "28px", textAlign: "center",  bottom: submitted ? '20px' : '54%', }}>
+                <Typography variant="h5" sx={{ marginBottom: '20px', fontWeight: "600", fontSize: "28px", textAlign: "center",  bottom: '54%', }}>
                     Data at your Fingertips
                 </Typography>
             )}
