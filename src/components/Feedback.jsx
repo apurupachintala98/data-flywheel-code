@@ -163,11 +163,12 @@ const MessageWithFeedback = ({ message, executeSQL, apiCortex }) => {
                         {message.text}
                     </SyntaxHighlighter>
                 ) : (
-                    <Typography>
-                        {typeof message.executedResponse === 'string'
-                            ? message.executedResponse
-                            : message.text}
-                    </Typography>
+                    // <Typography>
+                    //     {typeof message.executedResponse === 'string'
+                    //         ? message.executedResponse
+                    //         : message.text}
+                    // </Typography>
+                    <div dangerouslySetInnerHTML={{ __html: message.text }} />
                 )}
 
                 {message.showExecute && (

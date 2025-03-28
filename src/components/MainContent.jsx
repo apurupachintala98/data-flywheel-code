@@ -206,6 +206,56 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         }
     };
 
+    // const executeSQL = async (sqlQuery) => {
+    //     const payload = {
+    //         "query": {
+    //             "aplctn_cd": "aedldocai",
+    //             "app_id": "docai",
+    //             "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
+    //             "prompt": {
+    //                 "messages": [
+    //                     {
+    //                         "role": "user",
+    //                         "content": sqlQuery.prompt || sqlQuery.text
+    //                     }
+    //                 ]
+    //             },
+    //             "app_lvl_prefix": "",
+    //             "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
+    //             "exec_sql": sqlQuery.text
+    //         }
+    //     }
+    //     try {
+    //         const response = await ApiService.runExeSql(payload);
+    //         const resultData = response?.data;
+    //         const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
+    //         const executedMessage = {
+    //             text: sqlQuery.text,
+    //             fromUser: false,
+    //             executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
+    //             type: isTable ? "table" : "result",
+    //             showExecute: false,
+    //             showSummarize: true,
+    //             prompt: sqlQuery.prompt,
+    //         };
+    //         // setMessages((prevMessages) =>
+    //         //     prevMessages.map((msg) =>
+    //         //         msg.text === sqlQuery.text
+    //         //             ? { ...msg, showExecute: false }
+    //         //             : msg
+    //         //     ).concat(executedMessage)
+    //         // );
+
+    //         setMessages((prevMessages) => [...prevMessages, executedMessage]);
+
+
+    //     } catch (error) {
+    //         console.error("Error executing SQL:", error);
+    //         const errorMessage = { text: "Error executing SQL query.", fromUser: false };
+    //         setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    //     }
+    // };
+
     const executeSQL = async (sqlQuery) => {
         const payload = {
             "query": {
@@ -224,13 +274,61 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
                 "exec_sql": sqlQuery.text
             }
-        }
+        };
+    
         try {
             const response = await ApiService.runExeSql(payload);
             const resultData = response?.data;
             const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
+    
+            const convertToString = (input) => {
+                if (typeof input === 'string') return input;
+                if (Array.isArray(input)) return input.map(convertToString).join(', ');
+                if (typeof input === 'object' && input !== null)
+                    return Object.entries(input)
+                        .map(([key, value]) => `${key}: ${convertToString(value)}`)
+                        .join(', ');
+                return String(input);
+            };
+    
+            let htmlTable = '';
+            if (isTable) {
+                const columns = Object.keys(resultData[0]);
+    
+                htmlTable = `
+                    <div style="overflow-x:auto;">
+                        <table style="border-collapse: collapse; width: 100%;">
+                            <thead>
+                                <tr>
+                                    ${columns
+                                        .map(
+                                            (col) =>
+                                                `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col}</th>`
+                                        )
+                                        .join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${resultData
+                                    .map(
+                                        (row) =>
+                                            `<tr>${columns
+                                                .map(
+                                                    (col) =>
+                                                        `<td style="border: 1px solid black; padding: 8px;">${convertToString(
+                                                            row[col]
+                                                        )}</td>`
+                                                )
+                                                .join('')}</tr>`
+                                    )
+                                    .join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+            }
+    
             const executedMessage = {
-                text: sqlQuery.text,
+                text: isTable ? htmlTable : JSON.stringify(response, null, 2),
                 fromUser: false,
                 executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
                 type: isTable ? "table" : "result",
@@ -238,23 +336,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 showSummarize: true,
                 prompt: sqlQuery.prompt,
             };
-            // setMessages((prevMessages) =>
-            //     prevMessages.map((msg) =>
-            //         msg.text === sqlQuery.text
-            //             ? { ...msg, showExecute: false }
-            //             : msg
-            //     ).concat(executedMessage)
-            // );
-
+    
             setMessages((prevMessages) => [...prevMessages, executedMessage]);
-
-
+    
         } catch (error) {
             console.error("Error executing SQL:", error);
             const errorMessage = { text: "Error executing SQL query.", fromUser: false };
             setMessages((prevMessages) => [...prevMessages, errorMessage]);
         }
     };
+    
 
     const apiCortex = async (message) => {
         const sys_msg = "You are powerful AI assistant in providing accurate answers always. Be Concise in providing answers based on context.";
