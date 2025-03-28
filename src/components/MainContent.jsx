@@ -24,11 +24,17 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [isSearchHovered, setIsSearchHovered] = useState(false);
     const [yamlFiles, setYamlFiles] = useState([]); // State to store API data
     const [searchFiles, setSearchFiles] = useState([]); // State to store API data
-    const [aggregatedResponse, setAggregatedResponse] = useState('');
-    const [displayedText, setDisplayedText] = useState('');
-    const [promptQuestion, setPromptQuestion] = useState('');
+    const [uploadAnchorEl, uploadSetAnchorEl] = useState < null | HTMLElement > (null);
+    const open = Boolean(uploadAnchorEl);
 
-    const typingSpeed = 60;
+    const handleUploadMenuClick = (event) => {
+        uploadSetAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        uploadSetAnchorEl(null);
+    };
+
 
     useEffect(() => {
         const fetchYamlFiles = async () => {
@@ -738,7 +744,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                         Search Service
                                     </Button>
 
-                                    <Button
+                                    {/* <Button
                                         variant="outlined"
                                         component="a"
                                         href="https://app-carelon-eda_preprod.privatelink.snowflakecomputing.com/carelon/eda_preprod/#/data/databases/DOC_AI_DB/schemas/DOC_AI_SCHEMA/stage/COC_STAGE"
@@ -755,7 +761,53 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                         }}
                                     >
                                         Upload your Data
+                                    </Button> */}
+                                    <Button
+                                        variant="outlined"
+                                        onClick={handleUploadMenuClick}
+                                        rel="noopener noreferrer"
+                                        sx={{
+                                            borderRadius: "50px",
+                                            textTransform: "none",
+                                            fontSize: "14px",
+                                            padding: "6px 12px",
+                                            color: "#5d5d5d",
+                                            borderColor: "#5d5d5d",
+                                            fontSize: '13.3px'
+                                        }}
+                                    >
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="" class="h-[18px] w-[18px]"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3C12.5523 3 13 3.44772 13 4L13 11H20C20.5523 11 21 11.4477 21 12C21 12.5523 20.5523 13 20 13L13 13L13 20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20L11 13L4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11L11 11L11 4C11 3.44772 11.4477 3 12 3Z" fill="currentColor"></path></svg>
+                                        Upload your Data
                                     </Button>
+
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={open}
+                                        onClose={handleClose}
+                                        MenuListProps={{
+                                            'aria-labelledby': 'upload-button',
+                                        }}
+                                    >
+                                        <MenuItem onClick={handleClose}>Connect to Google Drive</MenuItem>
+                                        <MenuItem onClick={handleClose}>Connect to Microsoft OneDrive</MenuItem>
+                                        <MenuItem onClick={() => {
+                                            handleClose();
+                                            document.getElementById('fileInput')?.click();
+                                        }}>Upload from computer</MenuItem>
+                                    </Menu>
+
+                                    <input
+                                        id="fileInput"
+                                        type="file"
+                                        hidden
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                // Handle the file upload here
+                                                console.log("Uploading file:", file.name);
+                                            }
+                                        }}
+                                    />
                                 </Box>
                                     <IconButton onClick={handleSubmit} sx={{ backgroundColor: "#5d5d5d", borderRadius: "50%" }}>
                                         <FaArrowUp color="#fff" />
