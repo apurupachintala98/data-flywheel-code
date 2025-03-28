@@ -12,6 +12,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import CloseIcon from '@mui/icons-material/Close';
 import MessageWithFeedback from './Feedback';
 import ApiService from '../services/apiService';
+import HashLoader from 'react-spinners/HashLoader';
 import logo from '../assets/Logo.jpg';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
@@ -206,146 +207,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         }
     };
 
-    // const executeSQL = async (sqlQuery) => {
-    //     const payload = {
-    //         "query": {
-    //             "aplctn_cd": "aedldocai",
-    //             "app_id": "docai",
-    //             "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-    //             "prompt": {
-    //                 "messages": [
-    //                     {
-    //                         "role": "user",
-    //                         "content": sqlQuery.prompt || sqlQuery.text
-    //                     }
-    //                 ]
-    //             },
-    //             "app_lvl_prefix": "",
-    //             "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
-    //             "exec_sql": sqlQuery.text
-    //         }
-    //     }
-    //     try {
-    //         const response = await ApiService.runExeSql(payload);
-    //         const resultData = response?.data;
-    //         const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
-    //         const executedMessage = {
-    //             text: sqlQuery.text,
-    //             fromUser: false,
-    //             executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
-    //             type: isTable ? "table" : "result",
-    //             showExecute: false,
-    //             showSummarize: true,
-    //             prompt: sqlQuery.prompt,
-    //         };
-    //         // setMessages((prevMessages) =>
-    //         //     prevMessages.map((msg) =>
-    //         //         msg.text === sqlQuery.text
-    //         //             ? { ...msg, showExecute: false }
-    //         //             : msg
-    //         //     ).concat(executedMessage)
-    //         // );
-
-    //         setMessages((prevMessages) => [...prevMessages, executedMessage]);
-
-
-    //     } catch (error) {
-    //         console.error("Error executing SQL:", error);
-    //         const errorMessage = { text: "Error executing SQL query.", fromUser: false };
-    //         setMessages((prevMessages) => [...prevMessages, errorMessage]);
-    //     }
-    // };
-
-    // const executeSQL = async (sqlQuery) => {
-    //     const payload = {
-    //         "query": {
-    //             "aplctn_cd": "aedldocai",
-    //             "app_id": "docai",
-    //             "api_key": "78a799ea-a0f6-11ef-a0ce-15a449f7a8b0",
-    //             "prompt": {
-    //                 "messages": [
-    //                     {
-    //                         "role": "user",
-    //                         "content": sqlQuery.prompt || sqlQuery.text
-    //                     }
-    //                 ]
-    //             },
-    //             "app_lvl_prefix": "",
-    //             "session_id": "9df7d52d-da64-470c-8f4e-081be1dbbbfb",
-    //             "exec_sql": sqlQuery.text
-    //         }
-    //     };
-    
-    //     try {
-    //         const response = await ApiService.runExeSql(payload);
-    //         const resultData = response?.data;
-    //         const isTable = Array.isArray(resultData) && resultData.length > 0 && typeof resultData[0] === 'object';
-    
-    //         const convertToString = (input) => {
-    //             if (typeof input === 'string') return input;
-    //             if (Array.isArray(input)) return input.map(convertToString).join(', ');
-    //             if (typeof input === 'object' && input !== null)
-    //                 return Object.entries(input)
-    //                     .map(([key, value]) => `${key}: ${convertToString(value)}`)
-    //                     .join(', ');
-    //             return String(input);
-    //         };
-    
-    //         let htmlTable = '';
-    //         if (isTable) {
-    //             const columns = Object.keys(resultData[0]);
-    
-    //             htmlTable = `
-    //                 <div style="overflow-x:auto;">
-    //                     <table style="border-collapse: collapse; width: 100%;">
-    //                         <thead>
-    //                             <tr>
-    //                                 ${columns
-    //                                     .map(
-    //                                         (col) =>
-    //                                             `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col}</th>`
-    //                                     )
-    //                                     .join('')}
-    //                             </tr>
-    //                         </thead>
-    //                         <tbody>
-    //                             ${resultData
-    //                                 .map(
-    //                                     (row) =>
-    //                                         `<tr>${columns
-    //                                             .map(
-    //                                                 (col) =>
-    //                                                     `<td style="border: 1px solid black; padding: 8px;">${convertToString(
-    //                                                         row[col]
-    //                                                     )}</td>`
-    //                                             )
-    //                                             .join('')}</tr>`
-    //                                 )
-    //                                 .join('')}
-    //                         </tbody>
-    //                     </table>
-    //                 </div>`;
-    //         }
-    
-    //         const executedMessage = {
-    //             text: isTable ? htmlTable : JSON.stringify(response, null, 2),
-    //             fromUser: false,
-    //             executedResponse: isTable ? resultData : JSON.stringify(response, null, 2),
-    //             type: isTable ? "table" : "result",
-    //             showExecute: false,
-    //             showSummarize: true,
-    //             prompt: sqlQuery.prompt,
-    //         };
-    
-    //         setMessages((prevMessages) => [...prevMessages, executedMessage]);
-    
-    //     } catch (error) {
-    //         console.error("Error executing SQL:", error);
-    //         const errorMessage = { text: "Error executing SQL query.", fromUser: false };
-    //         setMessages((prevMessages) => [...prevMessages, errorMessage]);
-    //     }
-    // };
-
     const executeSQL = async (sqlQuery) => {
         try {
               const payload = {
@@ -384,9 +245,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         let modelReply = "";
           if (data && Array.isArray(data) && data.length > 0) {
                const columns = Object.keys(data[0]);
-               console.log(columns);
             const rows = data;
-            console.log(rows);
             modelReply = (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
                 <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -424,7 +283,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             );
           } else if (typeof data === 'string') {
             modelReply = data.response;
-            // setIsLoading(true);
           } else {
             modelReply = convertToString(data.response);
           }
@@ -432,21 +290,17 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             text: modelReply,
             fromUser: false,
             executedResponse: data,
-            // type: isTable ? "table" : "result",
             showExecute: false,
             showSummarize: true,
             prompt: sqlQuery.prompt,
           };
       
-          setMessages((prevChatLog) => [...prevChatLog, botMessage]);
-          // await apiCortexComplete(data, promptQuestion, setChatLog);
-        
+          setMessages((prevChatLog) => [...prevChatLog, botMessage]);        
         } catch (err) {
-          // Handle network errors or other unexpected issues
           const fallbackErrorMessage = 'Error communicating with backend.';
           const errorMessageContent = {
             role: 'assistant',
-            content: (
+            text: (
               <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                 <p style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>{fallbackErrorMessage}</p>
               </div>
@@ -457,7 +311,16 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
           };
           setMessages((prevChatLog) => [...prevChatLog, errorMessageContent]); // Update chat log with assistant's error message
           console.error('Error:', err); // Log the error for debugging
-        } 
+        } finally {
+            // Hide the execute button on the original message
+            setMessages((prevChatLog) =>
+                prevChatLog.map((msg) =>
+                msg.text === sqlQuery.text
+                  ? { ...msg, showExecute: false }
+                  : msg
+              )
+            );
+          }
       }
     
     const apiCortex = async (message) => {
