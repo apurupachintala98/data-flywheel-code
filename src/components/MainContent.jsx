@@ -7,6 +7,9 @@ import TaskIcon from '@mui/icons-material/Task';
 import TuneIcon from '@mui/icons-material/Tune';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CircularProgress from '@mui/material/CircularProgress';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import CloseIcon from '@mui/icons-material/Close';
 import MessageWithFeedback from './Feedback';
 import ApiService from '../services/apiService';
 import logo from '../assets/Logo.jpg';
@@ -31,6 +34,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const open = Boolean(uploadAnchorEl);
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleUploadMenuClick = (event) => {
         uploadSetAnchorEl(event.currentTarget);
