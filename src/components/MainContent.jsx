@@ -382,10 +382,10 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             return String(input);
           };
         let modelReply = "";
-          if (data && Array.isArray(data.response) && data.response.length > 0) {
-               const columns = Object.keys(data.response[0]);
+          if (data && Array.isArray(data) && data.length > 0) {
+               const columns = Object.keys(data[0]);
                console.log(columns);
-            const rows = data.response;
+            const rows = data;
             console.log(rows);
             modelReply = (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
@@ -431,7 +431,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
           const botMessage = {
             text: modelReply,
             fromUser: false,
-            executedResponse: data.response,
+            executedResponse: modelReply,
             // type: isTable ? "table" : "result",
             showExecute: false,
             showSummarize: true,
