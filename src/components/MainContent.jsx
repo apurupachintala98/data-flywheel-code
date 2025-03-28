@@ -30,6 +30,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [uploadAnchorEl, uploadSetAnchorEl] = useState(null);
     const open = Boolean(uploadAnchorEl);
     const fileInputRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const handleUploadMenuClick = (event) => {
         uploadSetAnchorEl(event.currentTarget);
@@ -123,6 +124,29 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     };
 
     const handleSubmit = async () => {
+
+        if (selectedFile) {
+            // Upload file flow
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+        
+            try {
+              await axios.post("http://10.126.192.122:8888/upload_csv/", formData, {
+                headers: {
+                  "Content-Type": "multipart/form-data"
+                }
+              });
+        
+              toast.success("File uploaded successfully!", { position: "top-right" });
+              setSelectedFile(null);
+            } catch (error) {
+              toast.error("Upload failed. Please try again.", { position: "top-right" });
+              console.error("Upload error:", error);
+            }
+        
+            return; // Stop here if file was uploaded
+          }
+          
         if (!inputValue.trim()) return; // Prevent empty submissions
 
         const userMessage = { text: inputValue, fromUser: true };
@@ -347,33 +371,14 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         handleClose();
         fileInputRef.current?.click();
       };
-    
-      const handleFileChange = async (e) => {
+
+      const handleFileChange = (e) => {
         const file = e.target.files?.[0];
-        if (!file) return;
-    
-        const formData = new FormData();
-        formData.append('file', file);
-    
-        try {
-          await axios.post('http://10.126.192.122:8888/upload_csv/', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          });
-    
-          toast.success("File uploaded successfully!", {
-            position: "top-right"
-          });
-    
-        } catch (error) {
-          toast.error("Upload failed. Please try again.", {
-            position: "top-right"
-          });
-          console.error("Upload error:", error);
+        if (file) {
+          setSelectedFile(file);
         }
       };
-    
+
 
     return (
         <Box
@@ -822,21 +827,44 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                         anchorOrigin={{
                                             vertical: 'bottom',
                                             horizontal: 'left',
-                                          }}
-                                          transformOrigin={{
+                                        }}
+                                        transformOrigin={{
                                             vertical: 'top',
                                             horizontal: 'left',
-                                          }}
+                                        }}
                                     >
+                                        <MenuItem onClick={() => { handleClose(); window.location.href = "https://drive.google.com"; }}>
+                                            Connect to Google Drive
+                                        </MenuItem>
                                         <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
                                     </Menu>
 
                                     <input
-                                        id="fileInput"
-                                        type="file"
-                                        hidden
-                                        onChange={handleFileChange}
-                                    />
+  type="file"
+  ref={fileInputRef}
+  hidden
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) setSelectedFile(file);
+  }}
+/>
+
+                                    {selectedFile && (
+                                        <Box sx={{
+                                            border: '1px dashed #aaa',
+                                            borderRadius: '8px',
+                                            padding: '10px',
+                                            marginTop: '16px',
+                                            width: 'fit-content',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px'
+                                        }}>
+                                            <span role="img" aria-label="doc">📄</span>
+                                            <Typography variant="body2">{selectedFile.name}</Typography>
+                                            <Button onClick={() => setSelectedFile(null)} size="small">✕</Button>
+                                        </Box>
+                                    )}
                                     <ToastContainer />
                                 </Box>
                                     <IconButton onClick={handleSubmit} sx={{ backgroundColor: "#5d5d5d", borderRadius: "50%" }}>
