@@ -10,6 +10,9 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import MessageWithFeedback from './Feedback';
 import ApiService from '../services/apiService';
 import logo from '../assets/Logo.jpg';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) => {
     const [inputValue, setInputValue] = useState('');
@@ -26,6 +29,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [searchFiles, setSearchFiles] = useState([]); // State to store API data
     const [uploadAnchorEl, uploadSetAnchorEl] = useState(null);
     const open = Boolean(uploadAnchorEl);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleUploadMenuClick = (event) => {
         uploadSetAnchorEl(event.currentTarget);
