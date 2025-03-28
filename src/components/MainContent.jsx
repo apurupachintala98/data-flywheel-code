@@ -715,7 +715,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     zIndex: 1200,
                 }}>
                     {messages.length === 0 && (
-                        <Typography variant="h5" sx={{ marginBottom: '20px', fontWeight: "600", fontSize: "28px", textAlign: "center", bottom: '54%', }}>
+                        <Typography variant="h5" sx={{ marginBottom: '20px', fontWeight: "600", fontSize: "28px", textAlign: "center", bottom: '54%',position: 'absolute', }}>
                             Data at your Fingertips
                         </Typography>
                     )}
