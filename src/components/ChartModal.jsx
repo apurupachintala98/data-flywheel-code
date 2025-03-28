@@ -4,7 +4,7 @@ import HighchartsReact from 'highcharts-react-official';
 // import exporting from 'highcharts/modules/exporting';
 // import exportData from 'highcharts/modules/export-data'; // Optional for CSV export
 // import offlineExporting from 'highcharts/modules/offline-exporting'; // Import offline exporting module
-import variablePie from 'highcharts/modules/variable-pie'; // Import the variable-pie module
+// import variablePie from 'highcharts/modules/variable-pie'; // Import the variable-pie module
 import more from 'highcharts/highcharts-more';
 import {
   Modal,
@@ -21,7 +21,7 @@ import {
 // exporting(Highcharts);
 // exportData(Highcharts); // Optional, for CSV export
 // offlineExporting(Highcharts); // Initialize offline exporting
-variablePie(Highcharts); // Initialize variable-pie module
+// variablePie(Highcharts); // Initialize variable-pie module
 more(Highcharts);
 
 const ChartModal = ({ visible, onClose, chartData = [] }) => {
@@ -46,23 +46,23 @@ const ChartModal = ({ visible, onClose, chartData = [] }) => {
     const titleText = `Showing only top ${limitedData.length} data points`;
     
     switch (chartType) {
-      case 'pie':
-        return {
-          chart: { type: 'variablepie' },
-          title: { text: titleText },
-          credits: { enabled: false },
-          series: [{
-            minPointSize: 10,
-            innerSize: '20%',
-            zMin: 0,
-            name: 'data',
-            data: limitedData.map(item => ({
-              name: item[xAxisKey],
-              y: item[yAxisKey],
-              z: item[yAxisKey] // Assuming yAxisKey value defines radius
-            }))
-          }]
-        };
+      // case 'pie':
+      //   return {
+      //     chart: { type: 'variablepie' },
+      //     title: { text: titleText },
+      //     credits: { enabled: false },
+      //     series: [{
+      //       minPointSize: 10,
+      //       innerSize: '20%',
+      //       zMin: 0,
+      //       name: 'data',
+      //       data: limitedData.map(item => ({
+      //         name: item[xAxisKey],
+      //         y: item[yAxisKey],
+      //         z: item[yAxisKey] // Assuming yAxisKey value defines radius
+      //       }))
+      //     }]
+      //   };
 
       case 'bubble':
         return {
@@ -142,7 +142,7 @@ const ChartModal = ({ visible, onClose, chartData = [] }) => {
             onChange={(e) => setChartType(e.target.value)}
             label="Chart Type"
           >
-            <MenuItem value="pie">Variable Radius Pie</MenuItem>
+            {/* <MenuItem value="pie">Variable Radius Pie</MenuItem> */}
             <MenuItem value="bubble">Bubble Chart</MenuItem>
             <MenuItem value="line">Line Chart</MenuItem>
             <MenuItem value="area">Area Chart</MenuItem>
