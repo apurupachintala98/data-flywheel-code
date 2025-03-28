@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import exporting from 'highcharts/modules/exporting';
+// import exporting from 'highcharts/modules/exporting';
 import exportData from 'highcharts/modules/export-data'; // Optional for CSV export
 import offlineExporting from 'highcharts/modules/offline-exporting'; // Import offline exporting module
 import variablePie from 'highcharts/modules/variable-pie'; // Import the variable-pie module
@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 
 // Initialize exporting and additional chart modules
-exporting(Highcharts);
+// exporting(Highcharts);
 exportData(Highcharts); // Optional, for CSV export
 offlineExporting(Highcharts); // Initialize offline exporting
 variablePie(Highcharts); // Initialize variable-pie module
