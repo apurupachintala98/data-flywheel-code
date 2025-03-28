@@ -131,28 +131,28 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
         if (selectedFile) {
             setIsUploading(true);
-        
+
             const formData = new FormData();
             formData.append('file', selectedFile);
-        
+
             try {
-              await axios.post('http://10.126.192.122:8888/upload_csv/', formData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                },
-              });
-        
-              toast.success('File uploaded successfully!', { position: 'top-right' });
-              setSelectedFile(null);
+                await axios.post('http://10.126.192.122:8888/upload_csv/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                toast.success('File uploaded successfully!', { position: 'top-right' });
+                setSelectedFile(null);
             } catch (error) {
-              toast.error('Upload failed. Please try again.', { position: 'top-right' });
-              console.error('Upload error:', error);
+                toast.error('Upload failed. Please try again.', { position: 'top-right' });
+                console.error('Upload error:', error);
             } finally {
-              setIsUploading(false);
+                setIsUploading(false);
             }
-        
+
             return;
-          }
+        }
 
         if (!inputValue.trim()) return; // Prevent empty submissions
 
@@ -377,14 +377,14 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const handleUploadFromComputer = () => {
         handleClose();
         fileInputRef.current?.click();
-      };
+    };
 
-      const handleFileChange = (e) => {
+    const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-          setSelectedFile(file);
+            setSelectedFile(file);
         }
-      };
+    };
 
 
     return (
@@ -703,7 +703,48 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
                         }}
                     >
-                        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', position: 'relative' }}>
+                            {selectedFile && (
+                                <Box sx={{ mr: 2, position: 'relative' }}>
+                                    <Box
+                                        sx={{
+                                            height: 48,
+                                            width: 48,
+                                            borderRadius: '12px',
+                                            border: '1px solid #e0e0e0',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: '#f9f9f9'
+                                        }}
+                                    >
+                                        {isUploading ? (
+                                            <CircularProgress size={22} />
+                                        ) : (
+                                            <InsertDriveFileIcon sx={{ color: '#9e9e9e', fontSize: 20 }} />
+                                        )}
+
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => setSelectedFile(null)}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: '-6px',
+                                                right: '-6px',
+                                                backgroundColor: '#000',
+                                                color: '#fff',
+                                                '&:hover': {
+                                                    backgroundColor: '#333',
+                                                },
+                                                width: 18,
+                                                height: 18,
+                                            }}
+                                        >
+                                            <CloseIcon sx={{ fontSize: 12 }} />
+                                        </IconButton>
+                                    </Box>
+                                </Box>
+                            )}
                             <TextField
                                 value={inputValue}
                                 onChange={handleInputChange}
@@ -739,6 +780,14 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     <FaArrowUp color="#fff" />
                                 </IconButton>
                             )}
+
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                            />
+
                         </Box>
 
 
@@ -752,50 +801,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     marginTop: '12px'
                                 }}
                             >
-                                {selectedFile && (
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-        <Box
-          sx={{
-            position: 'relative',
-            height: 56,
-            width: 56,
-            borderRadius: '12px',
-            border: '1px solid #e0e0e0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f9f9f9'
-          }}
-        >
-          {isUploading ? (
-            <CircularProgress size={28} />
-          ) : (
-            <InsertDriveFileIcon sx={{ color: '#9e9e9e', fontSize: 24 }} />
-          )}
-          <IconButton
-            size="small"
-            onClick={() => setSelectedFile(null)}
-            sx={{
-              position: 'absolute',
-              top: '-6px',
-              right: '-6px',
-              backgroundColor: '#000',
-              color: '#fff',
-              '&:hover': {
-                backgroundColor: '#333',
-              },
-              width: 18,
-              height: 18,
-            }}
-          >
-            <CloseIcon sx={{ fontSize: 12 }} />
-          </IconButton>
-        </Box>
-        <Typography variant="body2" sx={{ maxWidth: 160, wordBreak: 'break-word' }}>
-          {selectedFile.name}
-        </Typography>
-      </Box>
-    )}
                                 <><Box sx={{ display: 'flex', gap: '8px' }}>
                                     <Button
                                         variant="outlined"
@@ -834,8 +839,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     >
                                         Search Service
                                     </Button>
-
-                                   
                                     <Button
                                         variant="outlined"
                                         onClick={handleUploadMenuClick}
@@ -853,7 +856,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="" class="h-[18px] w-[18px]"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3C12.5523 3 13 3.44772 13 4L13 11H20C20.5523 11 21 11.4477 21 12C21 12.5523 20.5523 13 20 13L13 13L13 20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20L11 13L4 13C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11L11 11L11 4C11 3.44772 11.4477 3 12 3Z" fill="currentColor"></path></svg>
                                         Upload your Data
                                     </Button>
-
                                     <Menu
                                         anchorEl={anchorEl}
                                         open={open}
@@ -869,35 +871,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                                     >
                                         <MenuItem onClick={handleUploadFromComputer}>Upload from computer</MenuItem>
                                     </Menu>
-
-                                    <input
-  type="file"
-  ref={fileInputRef}
-  style={{ display: 'none' }}
-  onChange={(e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  }}
-/>
-                                    {selectedFile && (
-                                        <Box sx={{
-                                            border: '1px dashed #aaa',
-                                            borderRadius: '8px',
-                                            padding: '10px',
-                                            marginTop: '16px',
-                                            width: 'fit-content',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px'
-                                        }}>
-                                            <span role="img" aria-label="doc">📄</span>
-                                            <Typography variant="body2">{selectedFile.name}</Typography>
-                                            <Button onClick={() => setSelectedFile(null)} size="small">✕</Button>
-                                        </Box>
-                                    )}
-                                    <ToastContainer />
                                 </Box>
                                     <IconButton onClick={handleSubmit} sx={{ backgroundColor: "#5d5d5d", borderRadius: "50%" }}>
                                         <FaArrowUp color="#fff" />
