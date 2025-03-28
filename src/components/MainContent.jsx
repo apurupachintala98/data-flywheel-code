@@ -504,7 +504,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     height: '100vh', // Ensure the content takes full height
                     position: 'relative', // Ensure dropdowns stay inside this box
                     transition: 'all 0.5s ease-in-out',
-                    overflow: 'hidden',
+                    overflowY: 'auto',
                 }}
             >
                 <Box sx={{
@@ -728,7 +728,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     </Box>
                 </Box>
 
-                <Box id="message-scroll-container"
+                <Box id="message-scroll-container" tabIndex={0}
                     sx={{
                         paddingTop: '80px',
                         paddingBottom: '140px',
