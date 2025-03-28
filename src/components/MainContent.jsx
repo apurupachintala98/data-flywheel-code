@@ -29,7 +29,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     const [searchFiles, setSearchFiles] = useState([]); // State to store API data
     const [uploadAnchorEl, uploadSetAnchorEl] = useState(null);
     const open = Boolean(uploadAnchorEl);
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const fileInputRef = useRef(null);
 
     const handleUploadMenuClick = (event) => {
         uploadSetAnchorEl(event.currentTarget);
