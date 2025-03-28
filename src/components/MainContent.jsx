@@ -384,7 +384,9 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         let modelReply = "";
           if (data && Array.isArray(data.response) && data.response.length > 0) {
                const columns = Object.keys(data.response[0]);
+               console.log(columns);
             const rows = data.response;
+            console.log(rows);
             modelReply = (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
                 <table style={{ borderCollapse: 'collapse', width: '100%' }}>
