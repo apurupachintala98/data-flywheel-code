@@ -76,6 +76,11 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         fetchSearchFiles();
     }, []);
 
+    {useEffect(() => {
+        const anchor = document.getElementById('scroll-anchor');
+        anchor?.scrollIntoView({ behavior: 'smooth' });
+      }, [messages]);}
+
     // Effect to reset chat when "New Chat" is clicked
     useEffect(() => {
         if (resetChat) {
@@ -909,7 +914,7 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
     >
         <Box sx={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0px 30px',
-            position: 'absolute', top: '0px', left: '0', right: '0',
+            position: 'absolute', top: '0px', left: '0', right: '0', zIndex: 100,
         }}>
 
             {collapsed && (
@@ -1128,12 +1133,18 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
             </Box>
         </Box>
 
-        <Box sx={{
+        <Box id="message-scroll-container"
+        sx={{
+            paddingTop: '80px',
+      paddingBottom: '140px',
+     
+      flexGrow: 1,
             textAlign: 'center',
             marginTop: '50px',
             width: '100%',
-            overflowY: 'auto',
-            scrollbarWidth: 'none',         // Firefox
+            overflowY: 'scroll',
+            scrollbarWidth: 'none', 
+            scrollBehavior: 'smooth',        // Firefox
   '&::-webkit-scrollbar': {
     display: 'none',              // Chrome, Safari
   },
@@ -1184,14 +1195,26 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 </Box>
 
             ))}
+    <div id="scroll-anchor" style={{ height: 1 }} />
 
-            <Box sx={{
+           
+        </Box>
+
+        <Box sx={{
+                // display: 'flex',
+                // flexDirection: 'column',
+                // alignItems: 'center',
+                // width: '100%',
+                // marginTop: messages.length === 0 ? '36%' : '40px',  // Add spacing above input field
+                position: 'fixed',
+                bottom: 20,
+                left: 0,
+                right: 0,
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-                marginTop: messages.length === 0 ? '36%' : '40px',  // Add spacing above input field
+                justifyContent: 'center',
+                zIndex: 1200,
             }}>
+                
 
                 <Box
                     sx={{
@@ -1399,7 +1422,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                     )}
                 </Box>
             </Box>
-        </Box>
     </Box>
     );
 };
