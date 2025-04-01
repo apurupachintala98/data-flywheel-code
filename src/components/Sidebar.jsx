@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, IconButton, Link, Typography, Divider, Tooltip } from '@mui/material';
 import { FaComments, FaSearch, FaPen, FaSun, FaUser, FaInfoCircle, FaSignOutAlt, FaTrashAlt, FaAngleLeft, FaAngleRight, FaBell, } from 'react-icons/fa'; // Icons
 import logo from '../assets/Logo.jpg';
+import logoElevance from '../assets/logo.svg';
 
 const Sidebar = ({ collapsed, toggleSidebar, onNewChat, onPromptSelect }) => {
 
@@ -67,6 +68,9 @@ const Sidebar = ({ collapsed, toggleSidebar, onNewChat, onPromptSelect }) => {
                     </IconButton>
                 </Box>
             </Box>
+
+            <img src={logoElevance} alt="Logo" width={180} />
+
             <Link
                 href="/"
                 sx={{
@@ -99,7 +103,7 @@ const Sidebar = ({ collapsed, toggleSidebar, onNewChat, onPromptSelect }) => {
                     {/* <FaComments size={16} color="#000000" /> */}
                     <img
                         src={logo} // Update this with the correct image path
-                        style={{ width: '24px', height: '24px' }}
+                        style={{ width: '30px', height: '30px' }}
                     />
                 </Box>
                 <Typography
@@ -109,10 +113,10 @@ const Sidebar = ({ collapsed, toggleSidebar, onNewChat, onPromptSelect }) => {
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
-                        fontSize: '1.1rem'
+                        fontSize: '1.6rem'
                     }}
                 >
-                    Data Flywheel
+                    Data Fly Wheel
                 </Typography>
             </Link>
             <Box
