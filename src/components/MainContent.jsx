@@ -153,7 +153,6 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
 
         if (selectedFile) {
             setIsUploading(true);
-
             const formData = new FormData();
             formData.append('file', selectedFile);
 
@@ -207,12 +206,81 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
         };
         try {
             setIsLoading(true);
-            const response = await ApiService.sendTextToSQL(payload);
+            const response = await fetch("http://10.126.192.122:8340/api/cortex/txt2sql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            // const response = await ApiService.sendTextToSQL(payload);
             const modelResponse = response?.response || "No valid response received.";
             const responseType = response?.type || "text";
             const prompt = response?.prompt || inputValue;
             const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql', prompt: prompt };
             setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+    
+            let fullText = '';
+            let isDone = false;
+    
+            setMessages(prev => [
+                ...prev,
+                {
+                    text: '',
+                    fromUser: false,
+                    summarized: true,
+                    type: 'text',
+                    streaming: true
+                }
+            ]);
+    
+            while (!isDone) {
+                const { value, done } = await reader.read();
+                if (done) break;
+    
+                let chunk = decoder.decode(value, { stream: true });
+    
+                const eosIndex = chunk.indexOf("end_of_stream");
+                if (eosIndex !== -1) {
+                    chunk = chunk.slice(0, eosIndex);
+                    isDone = true;
+                }
+    
+                fullText += chunk;
+    
+                setMessages(prev => {
+                    const lastIndex = prev.length - 1;
+                    const last = prev[lastIndex];
+                    if (last?.streaming) {
+                        return [
+                            ...prev.slice(0, lastIndex),
+                            {
+                                ...last,
+                                text: fullText,
+                                streaming: true
+                            }
+                        ];
+                    }
+                    return prev;
+                });
+            }
+    
+            setMessages(prev => {
+                return prev.map((msg, index) => {
+                    if (index === prev.length - 1 && msg.streaming) {
+                        return {
+                            ...msg,
+                            streaming: false,
+                            summarized: true,
+                            showSummarize: false
+                        };
+                    }
+                    return msg;
+                });
+            });
 
         } catch (error) {
             console.error("Error fetching API response:", error);
