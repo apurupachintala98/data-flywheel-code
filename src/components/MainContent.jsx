@@ -214,11 +214,11 @@ const MainContent = ({ collapsed, toggleSidebar, resetChat, selectedPrompt }) =>
                 body: JSON.stringify(payload)
             });
             // const response = await ApiService.sendTextToSQL(payload);
-            const modelResponse = response || "No valid response received.";
-            const responseType = response?.type || "text";
-            const prompt = response?.prompt || inputValue;
-            const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql', prompt: prompt };
-            setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+            // const modelResponse = response || "No valid response received.";
+            // const responseType = response?.type || "text";
+            // const prompt = response?.prompt || inputValue;
+            // const assistantMessage = { text: modelResponse || "No response received.", fromUser: false, type: responseType, showExecute: responseType === 'sql', prompt: prompt };
+            // setMessages((prevMessages) => [...prevMessages, assistantMessage]);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
